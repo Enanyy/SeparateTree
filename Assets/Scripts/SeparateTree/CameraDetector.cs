@@ -4,7 +4,7 @@ using System.Collections;
 /// <summary>
 /// 该触发器根据相机裁剪区域触发
 /// </summary>
-public class SceneCameraDetector : SceneDetectorBase
+public class CameraDetector : SeparateDetector
 {
     private Camera m_Camera;
 

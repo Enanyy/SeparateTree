@@ -13,7 +13,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <summary>
     /// 当前场景资源四叉树
     /// </summary>
-    private SeparateTree<SceneObject> m_QuadTree;
+    private SeparateTree<SeparateEntity> m_QuadTree;
 
     /// <summary>
     /// 刷新时间
@@ -30,20 +30,20 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <summary>
     /// 异步任务队列
     /// </summary>
-    private Queue<SceneObject> m_ProcessTaskQueue;
+    private Queue<SeparateEntity> m_ProcessTaskQueue;
 
     /// <summary>
     /// 已加载的物体列表
     /// </summary>
-    private List<SceneObject> m_LoadedObjectList;
+    private List<SeparateEntity> m_LoadedObjectList;
 
     /// <summary>
     /// 待销毁物体列表
     /// </summary>
     //private Queue<SceneObject> m_PreDestroyObjectQueue;
-    private PriorityQueue<SceneObject> m_PreDestroyObjectQueue;
+    private PriorityQueue<SeparateEntity> m_PreDestroyObjectQueue;
 
-    private TriggerHandle<SceneObject> m_TriggerHandle;
+    private TriggerHandle<SeparateEntity> m_TriggerHandle;
 
     private bool m_IsTaskRunning;
 
@@ -72,11 +72,11 @@ public class SceneObjectLoadController : MonoBehaviour
     {
         if (m_IsInitialized)
             return;
-        m_QuadTree = new SeparateTree<SceneObject>(treeType, center, size, quadTreeDepth);
-        m_LoadedObjectList = new List<SceneObject>();
+        m_QuadTree = new SeparateTree<SeparateEntity>(treeType, center, size, quadTreeDepth);
+        m_LoadedObjectList = new List<SeparateEntity>();
         //m_PreDestroyObjectQueue = new Queue<SceneObject>();
-        m_PreDestroyObjectQueue = new PriorityQueue<SceneObject>(new SceneObjectWeightComparer());
-        m_TriggerHandle = new TriggerHandle<SceneObject>(this.TriggerHandle); 
+        m_PreDestroyObjectQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
+        m_TriggerHandle = new TriggerHandle<SeparateEntity>(this.TriggerHandle); 
 
         m_MaxCreateCount = Mathf.Max(0, maxCreateCount);
         m_MinCreateCount = Mathf.Clamp(minCreateCount, 0, m_MaxCreateCount);
@@ -140,7 +140,7 @@ public class SceneObjectLoadController : MonoBehaviour
         if (obj == null)
             return;
         //使用SceneObject包装
-        SceneObject sbobj = new SceneObject(obj);
+        SeparateEntity sbobj = new SeparateEntity(obj);
         m_QuadTree.Add(sbobj);
         //如果当前触发器存在，直接物体是否可触发，如果可触发，则创建物体
         if (m_CurrentDetector != null && m_CurrentDetector.IsDetected(sbobj.Bounds))
@@ -195,31 +195,31 @@ public class SceneObjectLoadController : MonoBehaviour
     /// 四叉树触发处理函数
     /// </summary>
     /// <param name="data">与当前包围盒发生触发的场景物体</param>
-    void TriggerHandle(SceneObject data)
+    void TriggerHandle(SeparateEntity data)
     {
         if (data == null)
             return;
-        if (data.Flag == SceneObject.CreateFlag.Old) //如果发生触发的物体已经被创建则标记为新物体，以确保不会被删掉
+        if (data.Flag == SeparateEntity.CreateFlag.Old) //如果发生触发的物体已经被创建则标记为新物体，以确保不会被删掉
         {
             data.Weight ++;
-            data.Flag = SceneObject.CreateFlag.New;
+            data.Flag = SeparateEntity.CreateFlag.New;
         }
-        else if (data.Flag == SceneObject.CreateFlag.OutofBounds)//如果发生触发的物体已经被标记为超出区域，则从待删除列表移除该物体，并标记为新物体
+        else if (data.Flag == SeparateEntity.CreateFlag.OutofBounds)//如果发生触发的物体已经被标记为超出区域，则从待删除列表移除该物体，并标记为新物体
         {
-            data.Flag = SceneObject.CreateFlag.New;
+            data.Flag = SeparateEntity.CreateFlag.New;
             //if (m_PreDestroyObjectList.Remove(data))
             {
                 m_LoadedObjectList.Add(data);
             }
         }
-        else if (data.Flag == SceneObject.CreateFlag.None) //如果发生触发的物体未创建则创建该物体并加入已加载的物体列表
+        else if (data.Flag == SeparateEntity.CreateFlag.None) //如果发生触发的物体未创建则创建该物体并加入已加载的物体列表
         {
             DoCreateInternal(data);
         }
     }
 
     //执行创建物体
-    private void DoCreateInternal(SceneObject data)
+    private void DoCreateInternal(SeparateEntity data)
     {
         //加入已加载列表
         m_LoadedObjectList.Add(data);
@@ -237,9 +237,9 @@ public class SceneObjectLoadController : MonoBehaviour
         int i = 0;
         while (i < m_LoadedObjectList.Count)
         {
-            if (m_LoadedObjectList[i].Flag == SceneObject.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
+            if (m_LoadedObjectList[i].Flag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
             {
-                m_LoadedObjectList[i].Flag = SceneObject.CreateFlag.OutofBounds;
+                m_LoadedObjectList[i].Flag = SeparateEntity.CreateFlag.OutofBounds;
                 //m_PreDestroyObjectList.Add(m_LoadedObjectList[i]);
                 if (m_MinCreateCount == 0)//如果最小创建数为0直接删除
                 {
@@ -255,7 +255,7 @@ public class SceneObjectLoadController : MonoBehaviour
             }
             else
             {
-                m_LoadedObjectList[i].Flag = SceneObject.CreateFlag.Old;//其它物体标记为旧
+                m_LoadedObjectList[i].Flag = SeparateEntity.CreateFlag.Old;//其它物体标记为旧
                 i++;
             }
         }
@@ -273,7 +273,7 @@ public class SceneObjectLoadController : MonoBehaviour
             var obj = m_PreDestroyObjectQueue.Pop();
             if (obj == null)
                 continue;
-            if (obj.Flag == SceneObject.CreateFlag.OutofBounds)
+            if (obj.Flag == SeparateEntity.CreateFlag.OutofBounds)
             {
                 DestroyObject(obj, m_Asyn);
             }
@@ -285,19 +285,19 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void CreateObject(SceneObject obj, bool asyn)
+    private void CreateObject(SeparateEntity obj, bool asyn)
     {
         if (obj == null)
             return;
         if (obj.TargetObj == null)
             return;
-        if (obj.Flag == SceneObject.CreateFlag.None)
+        if (obj.Flag == SeparateEntity.CreateFlag.None)
         {
             if (!asyn)
                 CreateObjectSync(obj);
             else
                 ProcessObjectAsyn(obj, true);
-            obj.Flag = SceneObject.CreateFlag.New;//被创建的物体标记为New
+            obj.Flag = SeparateEntity.CreateFlag.New;//被创建的物体标记为New
         }
     }
 
@@ -306,11 +306,11 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void DestroyObject(SceneObject obj, bool asyn)
+    private void DestroyObject(SeparateEntity obj, bool asyn)
     {
         if (obj == null)
             return;
-        if (obj.Flag == SceneObject.CreateFlag.None)
+        if (obj.Flag == SeparateEntity.CreateFlag.None)
             return;
         if (obj.TargetObj == null)
             return;
@@ -318,18 +318,18 @@ public class SceneObjectLoadController : MonoBehaviour
             DestroyObjectSync(obj);
         else
             ProcessObjectAsyn(obj, false);
-        obj.Flag = SceneObject.CreateFlag.None;//被删除的物体标记为None
+        obj.Flag = SeparateEntity.CreateFlag.None;//被删除的物体标记为None
     }
 
     /// <summary>
     /// 同步方式创建物体
     /// </summary>
     /// <param name="obj"></param>
-    private void CreateObjectSync(SceneObject obj)
+    private void CreateObjectSync(SeparateEntity obj)
     {
-        if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareDestroy)//如果标记为IsPrepareDestroy表示物体已经创建并正在等待删除，则直接设为None并返回
+        if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//如果标记为IsPrepareDestroy表示物体已经创建并正在等待删除，则直接设为None并返回
         {
-            obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+            obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
             return;
         }
         obj.OnShow(transform);//执行OnShow
@@ -339,11 +339,11 @@ public class SceneObjectLoadController : MonoBehaviour
     /// 同步方式销毁物体
     /// </summary>
     /// <param name="obj"></param>
-    private void DestroyObjectSync(SceneObject obj)
+    private void DestroyObjectSync(SeparateEntity obj)
     {
-        if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareCreate)//如果物体标记为IsPrepareCreate表示物体未创建并正在等待创建，则直接设为None并放回
+        if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//如果物体标记为IsPrepareCreate表示物体未创建并正在等待创建，则直接设为None并放回
         {
-            obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+            obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
             return;
         }
         obj.OnHide();//执行OnHide
@@ -354,32 +354,32 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="create"></param>
-    private void ProcessObjectAsyn(SceneObject obj, bool create)
+    private void ProcessObjectAsyn(SeparateEntity obj, bool create)
     {
         if (create)
         {
-            if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareDestroy)//表示物体已经创建并等待销毁，则设置为None并跳过
+            if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//表示物体已经创建并等待销毁，则设置为None并跳过
             {
-                obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+                obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                 return;
             }
-            if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareCreate)//已经开始等待创建，则跳过
+            if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//已经开始等待创建，则跳过
                 return;
-            obj.ProcessFlag = SceneObject.CreatingProcessFlag.IsPrepareCreate;//设置为等待开始创建
+            obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.IsPrepareCreate;//设置为等待开始创建
         }
         else
         {
-            if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareCreate)//表示物体未创建并等待创建，则设置为None并跳过
+            if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//表示物体未创建并等待创建，则设置为None并跳过
             {
-                obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+                obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                 return;
             }
-            if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareDestroy)//已经开始等待销毁，则跳过
+            if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//已经开始等待销毁，则跳过
                 return;
-            obj.ProcessFlag = SceneObject.CreatingProcessFlag.IsPrepareDestroy;//设置为等待开始销毁
+            obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.IsPrepareDestroy;//设置为等待开始销毁
         }
         if (m_ProcessTaskQueue == null)
-            m_ProcessTaskQueue = new Queue<SceneObject>();
+            m_ProcessTaskQueue = new Queue<SeparateEntity>();
         m_ProcessTaskQueue.Enqueue(obj);//加入
         if (!m_IsTaskRunning)
         {
@@ -401,9 +401,9 @@ public class SceneObjectLoadController : MonoBehaviour
             var obj = m_ProcessTaskQueue.Dequeue();
             if (obj != null)
             {
-                if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareCreate)//等待创建
+                if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//等待创建
                 {
-                    obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+                    obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                     if (obj.OnShow(transform))
                     {
                         if (m_WaitForFrame == null)
@@ -411,9 +411,9 @@ public class SceneObjectLoadController : MonoBehaviour
                         yield return m_WaitForFrame;
                     }
                 }
-                else if (obj.ProcessFlag == SceneObject.CreatingProcessFlag.IsPrepareDestroy)//等待销毁
+                else if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//等待销毁
                 {
-                    obj.ProcessFlag = SceneObject.CreatingProcessFlag.None;
+                    obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                     obj.OnHide();
                     if (m_WaitForFrame == null)
                         m_WaitForFrame = new WaitForEndOfFrame();
@@ -424,10 +424,10 @@ public class SceneObjectLoadController : MonoBehaviour
         m_IsTaskRunning = false;
     }
 
-    private class SceneObjectWeightComparer : IComparer<SceneObject>
+    private class SceneObjectWeightComparer : IComparer<SeparateEntity>
     {
 
-        public int Compare(SceneObject x, SceneObject y)
+        public int Compare(SeparateEntity x, SeparateEntity y)
         {
             if (y.Weight < x.Weight)
                 return 1;

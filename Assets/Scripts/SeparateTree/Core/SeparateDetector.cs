@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class SceneDetectorBase : MonoBehaviour, IDetector
+public abstract class SeparateDetector : MonoBehaviour, IDetector
 {
     public Vector3 Position
     {

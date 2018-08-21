@@ -202,7 +202,7 @@ public class SeparateTreeNode<T> where T : ISeparateEntity, ILinkedListNode
             var node = m_ObjectList.First;
             while (node != null)
             {
-                var sceneobj = node.Value as SceneObject;
+                var sceneobj = node.Value as SeparateEntity;
                 if (sceneobj != null)
                     sceneobj.DrawArea(objColor, hitObjColor);
                 node = node.Next;

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 场景物件（用来包装实际用于动态加载的物体）
 /// </summary>
-public class SceneObject : ISeparateEntity, ILinkedListNode
+public class SeparateEntity : ISeparateEntity, ILinkedListNode
 {
     /// <summary>
     /// 场景物件创建标记
@@ -78,7 +78,7 @@ public class SceneObject : ISeparateEntity, ILinkedListNode
 
     private object m_Node;
 
-    public SceneObject(ISeparateEntity obj)
+    public SeparateEntity(ISeparateEntity obj)
     {
         m_Weight = 0;
         m_TargetObj = obj;

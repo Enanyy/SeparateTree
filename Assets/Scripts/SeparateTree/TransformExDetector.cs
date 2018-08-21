@@ -4,7 +4,7 @@ using System.Collections;
 /// <summary>
 /// 该触发器根据Transform的包围盒区域触发-且根据Transform运动趋势扩展包围盒
 /// </summary>
-public class SceneTransformExDetector : SceneDetectorBase
+public class TransformExDetector : SeparateDetector
 {
     public Vector3 detectorSize;
 

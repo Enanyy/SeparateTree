@@ -4,7 +4,7 @@ using System.Collections;
 /// <summary>
 /// 该触发器根据相机裁剪区域触发，且根据相机运动趋势改变裁剪区域
 /// </summary>
-public class SceneCameraExDetector : SceneDetectorBase
+public class CameraExDetector : SeparateDetector
 {
     #region 裁剪区域扩展趋势参数
     /// <summary>

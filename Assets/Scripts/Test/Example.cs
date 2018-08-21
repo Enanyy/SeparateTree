@@ -73,7 +73,7 @@ public class Example : MonoBehaviour
 
     public bool asyn;
 
-    public SceneDetectorBase detector;
+    public SeparateDetector detector;
 
     private SceneObjectLoadController m_Controller;
 
