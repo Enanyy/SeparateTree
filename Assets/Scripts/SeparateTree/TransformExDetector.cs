@@ -16,22 +16,22 @@ public class TransformExDetector : SeparateDetector
     public float bottomExtDis;
     #endregion
 
-    private Vector3 m_Position;
+    private Vector3 mPosition;
 
-    private Bounds m_Bounds;
+    private Bounds mBounds;
 
-    private Vector3 m_PosOffset;
-    private Vector3 m_SizeEx;
+    private Vector3 mPosOffset;
+    private Vector3 mSizeEx;
 
     void Start()
     {
-        m_Position = transform.position;
+        mPosition = transform.position;
     }
 
     void Update()
     {
-        Vector3 movedir = transform.position - m_Position;
-        m_Position = transform.position;
+        Vector3 movedir = transform.position - mPosition;
+        mPosition = transform.position;
 
         float xex = 0,zex = 0;
         if (movedir.x < -Mathf.Epsilon)
@@ -46,21 +46,21 @@ public class TransformExDetector : SeparateDetector
             zex = topExtDis;
         else
             zex = 0;
-        m_PosOffset = new Vector3(xex*0.5f, 0, zex*0.5f);
-        m_SizeEx = new Vector3(Mathf.Abs(xex), 0, Mathf.Abs(zex));
+        mPosOffset = new Vector3(xex*0.5f, 0, zex*0.5f);
+        mSizeEx = new Vector3(Mathf.Abs(xex), 0, Mathf.Abs(zex));
     }
 
     public override bool IsDetected(Bounds bounds)
     {
-        m_Bounds.center = Position + m_PosOffset;
-        m_Bounds.size = detectorSize + m_SizeEx;
-        return bounds.Intersects(m_Bounds);
+        mBounds.center = Position + mPosOffset;
+        mBounds.size = detectorSize + mSizeEx;
+        return bounds.Intersects(mBounds);
     }
 
 #if UNITY_EDITOR
     void OnDrawGizmos()
     {
-        Bounds b = new Bounds(transform.position + m_PosOffset, detectorSize + m_SizeEx);
+        Bounds b = new Bounds(transform.position + mPosOffset, detectorSize + mSizeEx);
         b.DrawBounds(Color.yellow);
     }
 #endif

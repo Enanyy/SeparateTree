@@ -9,43 +9,43 @@ using System.Collections.Generic;
 public class TestSceneObject : ISeparateEntity
 {
     [SerializeField]
-    private Bounds m_Bounds;
+    private Bounds mBounds;
     [SerializeField]
-    private string m_ResPath;
+    private string mResPath;
     [SerializeField]
-    private Vector3 m_Position;
+    private Vector3 mPosition;
     [SerializeField]
-    private Vector3 m_Rotation;
+    private Vector3 mRotation;
     [SerializeField]
-    private Vector3 m_Size;
+    private Vector3 mSize;
 
-    private GameObject m_LoadedPrefab;
+    private GameObject mLoadedPrefab;
 
     public Bounds Bounds
     {
-        get { return m_Bounds; }
+        get { return mBounds; }
     }
 
     public void OnHide()
     {
-        if (m_LoadedPrefab)
+        if (mLoadedPrefab)
         {
-            Object.Destroy(m_LoadedPrefab);
-            m_LoadedPrefab = null;
-            TestResManager.UnLoad(m_ResPath);
+            Object.Destroy(mLoadedPrefab);
+            mLoadedPrefab = null;
+            TestResManager.UnLoad(mResPath);
         }
     }
 
     public bool OnShow(Transform parent)
     {
-        if (m_LoadedPrefab == null)
+        if (mLoadedPrefab == null)
         {
-            var obj = TestResManager.Load(m_ResPath);
-            m_LoadedPrefab = UnityEngine.Object.Instantiate<GameObject>(obj);
-            m_LoadedPrefab.transform.SetParent(parent);
-            m_LoadedPrefab.transform.position = m_Position;
-            m_LoadedPrefab.transform.eulerAngles = m_Rotation;
-            m_LoadedPrefab.transform.localScale = m_Size;
+            var obj = TestResManager.Load(mResPath);
+            mLoadedPrefab = UnityEngine.Object.Instantiate<GameObject>(obj);
+            mLoadedPrefab.transform.SetParent(parent);
+            mLoadedPrefab.transform.position = mPosition;
+            mLoadedPrefab.transform.eulerAngles = mRotation;
+            mLoadedPrefab.transform.localScale = mSize;
             return true;
         }
         return false;
@@ -53,11 +53,11 @@ public class TestSceneObject : ISeparateEntity
 
     public TestSceneObject(Bounds bounds, Vector3 position, Vector3 rotation, Vector3 size, string resPath)
     {
-        m_Bounds = bounds;
-        m_Position = position;
-        m_Rotation = rotation;
-        m_Size = size;
-        m_ResPath = resPath;
+        mBounds = bounds;
+        mPosition = position;
+        mRotation = rotation;
+        mSize = size;
+        mResPath = resPath;
     }
 
 
@@ -75,19 +75,19 @@ public class Example : MonoBehaviour
 
     public SeparateDetector detector;
 
-    private SceneObjectLoadController m_Controller;
+    private SceneObjectLoadController mController;
 
     void Start()
     {
-        m_Controller = gameObject.GetComponent<SceneObjectLoadController>();
-        if (m_Controller == null)
-            m_Controller = gameObject.AddComponent<SceneObjectLoadController>();
-        m_Controller.Init(bounds.center, bounds.size, asyn, SeparateTreeType.QuadTree);
+        mController = gameObject.GetComponent<SceneObjectLoadController>();
+        if (mController == null)
+            mController = gameObject.AddComponent<SceneObjectLoadController>();
+        mController.Init(bounds.center, bounds.size, asyn, SeparateTreeType.QuadTree);
 
 
         for (int i = 0; i < loadObjects.Count; i++)
         {
-            m_Controller.AddSceneBlockObject(loadObjects[i]);
+            mController.AddSceneBlockObject(loadObjects[i]);
         }
     }
 
@@ -99,7 +99,7 @@ public class Example : MonoBehaviour
     
     void Update()
     {
-        m_Controller.RefreshDetector(detector);
+        mController.RefreshDetector(detector);
     }
 
     void OnDrawGizmosSelected()

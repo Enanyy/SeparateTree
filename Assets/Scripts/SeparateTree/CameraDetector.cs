@@ -6,18 +6,18 @@ using System.Collections;
 /// </summary>
 public class CameraDetector : SeparateDetector
 {
-    private Camera m_Camera;
+    private Camera mCamera;
 
     void Start()
     {
-        m_Camera = gameObject.GetComponent<Camera>();
+        mCamera = gameObject.GetComponent<Camera>();
     }
 
     public override bool IsDetected(Bounds bounds)
     {
-        if (m_Camera == null)
+        if (mCamera == null)
             return false;
-        return bounds.IsBoundsInCamera(m_Camera);
+        return bounds.IsBoundsInCamera(mCamera);
     }
 
 #if UNITY_EDITOR

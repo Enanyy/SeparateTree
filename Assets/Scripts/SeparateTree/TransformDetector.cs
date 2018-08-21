@@ -8,13 +8,13 @@ public class TransformDetector : SeparateDetector
 {
     public Vector3 detectorSize;
 
-    private Bounds m_Bounds;
+    private Bounds mBounds;
 
     public override bool IsDetected(Bounds bounds)
     {
-        m_Bounds.center = Position;
-        m_Bounds.size = detectorSize;
-        return bounds.Intersects(m_Bounds);
+        mBounds.center = Position;
+        mBounds.size = detectorSize;
+        return bounds.Intersects(mBounds);
     }
 
 #if UNITY_EDITOR

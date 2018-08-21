@@ -21,37 +21,37 @@ public class CameraExDetector : SeparateDetector
     public float bottomExtDis;
     #endregion
 
-    private Camera m_Camera;
-    private Vector3 m_Position;
+    private Camera mCamera;
+    private Vector3 mPosition;
 
-    private float m_LeftEx;
-    private float m_RightEx;
-    private float m_UpEx;
-    private float m_DownEx;
+    private float mLeftEx;
+    private float mRightEx;
+    private float mUpEx;
+    private float mDownEx;
 
     void Start()
     {
-        m_Camera = gameObject.GetComponent<Camera>();
-        m_Position = transform.position;
+        mCamera = gameObject.GetComponent<Camera>();
+        mPosition = transform.position;
     }
 
     void Update()
     {
-        Vector3 movedir = -transform.worldToLocalMatrix.MultiplyPoint(m_Position);
-        m_Position = transform.position;
+        Vector3 movedir = -transform.worldToLocalMatrix.MultiplyPoint(mPosition);
+        mPosition = transform.position;
             
-        m_LeftEx = movedir.x < -Mathf.Epsilon ? -horizontalExtDis : 0;
-        m_RightEx = movedir.x > Mathf.Epsilon ? horizontalExtDis : 0;
-        m_UpEx = movedir.y > Mathf.Epsilon ? topExtDis : 0;
-        m_DownEx = movedir.y < -Mathf.Epsilon ? -bottomExtDis : 0;
+        mLeftEx = movedir.x < -Mathf.Epsilon ? -horizontalExtDis : 0;
+        mRightEx = movedir.x > Mathf.Epsilon ? horizontalExtDis : 0;
+        mUpEx = movedir.y > Mathf.Epsilon ? topExtDis : 0;
+        mDownEx = movedir.y < -Mathf.Epsilon ? -bottomExtDis : 0;
     }
 
     public override bool IsDetected(Bounds bounds)
     {
-        if (m_Camera == null)
+        if (mCamera == null)
             return false;
         
-        return bounds.IsBoundsInCameraEx(m_Camera, m_LeftEx, m_RightEx, m_DownEx, m_UpEx);
+        return bounds.IsBoundsInCameraEx(mCamera, mLeftEx, mRightEx, mDownEx, mUpEx);
     }
 
 #if UNITY_EDITOR
@@ -59,7 +59,7 @@ public class CameraExDetector : SeparateDetector
     {
         Camera camera = gameObject.GetComponent<Camera>();
         if (camera)
-            GizmosEx.DrawViewFrustumEx(camera, m_LeftEx, m_RightEx, m_DownEx, m_UpEx, Color.yellow);
+            GizmosEx.DrawViewFrustumEx(camera, mLeftEx, mRightEx, mDownEx, mUpEx, Color.yellow);
     }
 #endif
 }

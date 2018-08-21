@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public delegate void TriggerHandle<T>(T trigger);
+public delegate void TriggerHandler<T>(T trigger);
 
 public enum SeparateTreeType
 {
@@ -16,30 +16,30 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
     {
         get
         {
-            if (m_Root != null)
-                return m_Root.Bounds;
+            if (mRoot != null)
+                return mRoot.Bounds;
             return default(Bounds);
         }
     }
 
     public int MaxDepth
     {
-        get { return m_MaxDepth; }
+        get { return mMaxDepth; }
     }
 
-    public SeparateTreeType CurrentTreeType { get { return m_TreeType; } }
+    public SeparateTreeType CurrentTreeType { get { return mTreeType; } }
 
     /// <summary>
     /// 根节点
     /// </summary>
-    private SeparateTreeNode<T> m_Root;
+    private SeparateTreeNode<T> mRoot;
 
     /// <summary>
     /// 最大深度
     /// </summary>
-    private int m_MaxDepth;
+    private int mMaxDepth;
 
-    private SeparateTreeType m_TreeType;
+    private SeparateTreeType mTreeType;
 
     /// <summary>
     /// 构造函数
@@ -50,39 +50,39 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
     /// <param name="maxDepth">树最大深度</param>
     public SeparateTree(SeparateTreeType treeType, Vector3 center, Vector3 size, int maxDepth)
     {
-        this.m_TreeType = treeType;
-        this.m_MaxDepth = maxDepth;
+        this.mTreeType = treeType;
+        this.mMaxDepth = maxDepth;
         if (treeType == SeparateTreeType.QuadTree)
-            this.m_Root = new SeparateTreeNode<T>(new Bounds(center, size), 0, 4);
+            this.mRoot = new SeparateTreeNode<T>(new Bounds(center, size), 0, 4);
         else
-            this.m_Root = new SeparateTreeNode<T>(new Bounds(center, size), 0, 8);
+            this.mRoot = new SeparateTreeNode<T>(new Bounds(center, size), 0, 8);
     }
 
     public void Add(T item)
     {
-        m_Root.Insert(item, 0, m_MaxDepth);
+        mRoot.Insert(item, 0, mMaxDepth);
     }
 
     public void Clear()
     {
-        m_Root.Clear();
+        mRoot.Clear();
     }
 
     public bool Contains(T item)
     {
-        return m_Root.Contains(item);
+        return mRoot.Contains(item);
     }
 
     public void Remove(T item)
     {
-         m_Root.Remove(item);
+         mRoot.Remove(item);
     }
 
-    public void Trigger(IDetector detector, TriggerHandle<T> handle)
+    public void Trigger(IDetector detector, TriggerHandler<T> handle)
     {
         if (handle == null)
             return;
-        m_Root.Trigger(detector, handle);
+        mRoot.Trigger(detector, handle);
     }
 
     public static implicit operator bool(SeparateTree<T> tree)
@@ -93,8 +93,8 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
 #if UNITY_EDITOR
     public void DrawTree(Color treeMinDepthColor, Color treeMaxDepthColor, Color objColor, Color hitObjColor, int drawMinDepth, int drawMaxDepth, bool drawObj)
     {
-        if (m_Root != null)
-            m_Root.DrawNode(treeMinDepthColor, treeMaxDepthColor, objColor, hitObjColor, drawMinDepth, drawMaxDepth, drawObj, m_MaxDepth);
+        if (mRoot != null)
+            mRoot.DrawNode(treeMinDepthColor, treeMaxDepthColor, objColor, hitObjColor, drawMinDepth, drawMaxDepth, drawObj, mMaxDepth);
     }
 #endif
 }

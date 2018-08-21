@@ -100,7 +100,7 @@ public class SeparateTreeNode<T> where T : ISeparateEntity, ILinkedListNode
         //return false;
     }
 
-    public void Trigger(IDetector detector, TriggerHandle<T> handle)
+    public void Trigger(IDetector detector, TriggerHandler<T> handle)
     {
         if (handle == null)
             return;

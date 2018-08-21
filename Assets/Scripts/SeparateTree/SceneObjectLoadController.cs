@@ -8,54 +8,54 @@ using UnityEngine;
 public class SceneObjectLoadController : MonoBehaviour
 {
 
-    private WaitForEndOfFrame m_WaitForFrame;
+    private WaitForEndOfFrame mWaitForFrame;
 
     /// <summary>
     /// 当前场景资源四叉树
     /// </summary>
-    private SeparateTree<SeparateEntity> m_QuadTree;
+    private SeparateTree<SeparateEntity> mSeparateTree;
 
     /// <summary>
     /// 刷新时间
     /// </summary>
-    private float m_RefreshTime;
+    private float mRefreshTime;
     /// <summary>
     /// 销毁时间
     /// </summary>
-    private float m_DestroyRefreshTime;
+    private float mDestroyRefreshTime;
     
-    private Vector3 m_OldRefreshPosition;
-    private Vector3 m_OldDestroyRefreshPosition;
+    private Vector3 mOldRefreshPosition;
+    private Vector3 mOldDestroyRefreshPosition;
 
     /// <summary>
     /// 异步任务队列
     /// </summary>
-    private Queue<SeparateEntity> m_ProcessTaskQueue;
+    private Queue<SeparateEntity> mProcessTaskQueue;
 
     /// <summary>
     /// 已加载的物体列表
     /// </summary>
-    private List<SeparateEntity> m_LoadedObjectList;
+    private List<SeparateEntity> mLoadedObjectList;
 
     /// <summary>
     /// 待销毁物体列表
     /// </summary>
     //private Queue<SceneObject> m_PreDestroyObjectQueue;
-    private PriorityQueue<SeparateEntity> m_PreDestroyObjectQueue;
+    private PriorityQueue<SeparateEntity> mPreDestroyObjectQueue;
 
-    private TriggerHandle<SeparateEntity> m_TriggerHandle;
+    private TriggerHandler<SeparateEntity> mTriggerHandler;
 
-    private bool m_IsTaskRunning;
+    private bool mIsTaskRunning;
 
-    private bool m_IsInitialized;
+    private bool mIsInitialized;
 
-    private int m_MaxCreateCount;
-    private int m_MinCreateCount;
-    private float m_MaxRefreshTime;
-    private float m_MaxDestroyTime;
-    private bool m_Asyn;
+    private int mMaxCreateCount;
+    private int mMinCreateCount;
+    private float mMaxRefreshTime;
+    private float mMaxDestroyTime;
+    private bool mIsAsyn;
 
-    private IDetector m_CurrentDetector;
+    private IDetector mDetector;
 
     /// <summary>
     /// 初始化
@@ -70,23 +70,23 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <param name="quadTreeDepth">四叉树深度</param>
     public void Init(Vector3 center, Vector3 size, bool asyn, int maxCreateCount, int minCreateCount, float maxRefreshTime, float maxDestroyTime, SeparateTreeType treeType , int quadTreeDepth = 5)
     {
-        if (m_IsInitialized)
+        if (mIsInitialized)
             return;
-        m_QuadTree = new SeparateTree<SeparateEntity>(treeType, center, size, quadTreeDepth);
-        m_LoadedObjectList = new List<SeparateEntity>();
+        mSeparateTree = new SeparateTree<SeparateEntity>(treeType, center, size, quadTreeDepth);
+        mLoadedObjectList = new List<SeparateEntity>();
         //m_PreDestroyObjectQueue = new Queue<SceneObject>();
-        m_PreDestroyObjectQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
-        m_TriggerHandle = new TriggerHandle<SeparateEntity>(this.TriggerHandle); 
+        mPreDestroyObjectQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
+        mTriggerHandler = new TriggerHandler<SeparateEntity>(this.OnTrigger); 
 
-        m_MaxCreateCount = Mathf.Max(0, maxCreateCount);
-        m_MinCreateCount = Mathf.Clamp(minCreateCount, 0, m_MaxCreateCount);
-        m_MaxRefreshTime = maxRefreshTime;
-        m_MaxDestroyTime = maxDestroyTime;
-        m_Asyn = asyn;
+        mMaxCreateCount = Mathf.Max(0, maxCreateCount);
+        mMinCreateCount = Mathf.Clamp(minCreateCount, 0, mMaxCreateCount);
+        mMaxRefreshTime = maxRefreshTime;
+        mMaxDestroyTime = maxDestroyTime;
+        mIsAsyn = asyn;
 
-        m_IsInitialized = true;
+        mIsInitialized = true;
 
-        m_RefreshTime = maxRefreshTime;
+        mRefreshTime = maxRefreshTime;
     }
 
     /// <summary>
@@ -115,16 +115,16 @@ public class SceneObjectLoadController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (m_QuadTree)
-            m_QuadTree.Clear();
-        m_QuadTree = null;
-        if (m_ProcessTaskQueue != null)
-            m_ProcessTaskQueue.Clear();
-        if (m_LoadedObjectList != null)
-            m_LoadedObjectList.Clear();
-        m_ProcessTaskQueue = null;
-        m_LoadedObjectList = null;
-        m_TriggerHandle = null;
+        if (mSeparateTree)
+            mSeparateTree.Clear();
+        mSeparateTree = null;
+        if (mProcessTaskQueue != null)
+            mProcessTaskQueue.Clear();
+        if (mLoadedObjectList != null)
+            mLoadedObjectList.Clear();
+        mProcessTaskQueue = null;
+        mLoadedObjectList = null;
+        mTriggerHandler = null;
     }
 
     /// <summary>
@@ -133,17 +133,17 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <param name="obj"></param>
     public void AddSceneBlockObject(ISeparateEntity obj)
     {
-        if (!m_IsInitialized)
+        if (!mIsInitialized)
             return;
-        if (m_QuadTree == null)
+        if (mSeparateTree == null)
             return;
         if (obj == null)
             return;
         //使用SceneObject包装
         SeparateEntity sbobj = new SeparateEntity(obj);
-        m_QuadTree.Add(sbobj);
+        mSeparateTree.Add(sbobj);
         //如果当前触发器存在，直接物体是否可触发，如果可触发，则创建物体
-        if (m_CurrentDetector != null && m_CurrentDetector.IsDetected(sbobj.Bounds))
+        if (mDetector != null && mDetector.IsDetected(sbobj.Bounds))
         {
             DoCreateInternal(sbobj);
         }
@@ -155,35 +155,35 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <param name="detector">触发器</param>
     public void RefreshDetector(IDetector detector)
     {
-        if (!m_IsInitialized)
+        if (!mIsInitialized)
             return;
         //只有坐标发生改变才调用
-        if (m_OldRefreshPosition != detector.Position)
+        if (mOldRefreshPosition != detector.Position)
         {
-            m_RefreshTime += Time.deltaTime;
+            mRefreshTime += Time.deltaTime;
             //达到刷新时间才刷新，避免区域更新频繁
-            if (m_RefreshTime > m_MaxRefreshTime)
+            if (mRefreshTime > mMaxRefreshTime)
             {
-                m_OldRefreshPosition = detector.Position;
-                m_RefreshTime = 0;
-                m_CurrentDetector = detector;
+                mOldRefreshPosition = detector.Position;
+                mRefreshTime = 0;
+                mDetector = detector;
                 //进行触发检测
-                m_QuadTree.Trigger(detector, m_TriggerHandle);
+                mSeparateTree.Trigger(detector, mTriggerHandler);
                 //标记超出区域的物体
                 MarkOutofBoundsObjs();
                 //m_IsInitLoadComplete = true;
             }
         }
-        if (m_OldDestroyRefreshPosition != detector.Position)
+        if (mOldDestroyRefreshPosition != detector.Position)
         {
-            if(m_PreDestroyObjectQueue != null && m_PreDestroyObjectQueue.Count >= m_MaxCreateCount && m_PreDestroyObjectQueue.Count > m_MinCreateCount)
+            if(mPreDestroyObjectQueue != null && mPreDestroyObjectQueue.Count >= mMaxCreateCount && mPreDestroyObjectQueue.Count > mMinCreateCount)
             //if (m_PreDestroyObjectList != null && m_PreDestroyObjectList.Count >= m_MaxCreateCount)
             {
-                m_DestroyRefreshTime += Time.deltaTime;
-                if (m_DestroyRefreshTime > m_MaxDestroyTime)
+                mDestroyRefreshTime += Time.deltaTime;
+                if (mDestroyRefreshTime > mMaxDestroyTime)
                 {
-                    m_OldDestroyRefreshPosition = detector.Position;
-                    m_DestroyRefreshTime = 0;
+                    mOldDestroyRefreshPosition = detector.Position;
+                    mDestroyRefreshTime = 0;
                     //删除超出区域的物体
                     DestroyOutOfBoundsObjs();
                 }
@@ -195,7 +195,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// 四叉树触发处理函数
     /// </summary>
     /// <param name="data">与当前包围盒发生触发的场景物体</param>
-    void TriggerHandle(SeparateEntity data)
+    void OnTrigger(SeparateEntity data)
     {
         if (data == null)
             return;
@@ -209,7 +209,7 @@ public class SceneObjectLoadController : MonoBehaviour
             data.Flag = SeparateEntity.CreateFlag.New;
             //if (m_PreDestroyObjectList.Remove(data))
             {
-                m_LoadedObjectList.Add(data);
+                mLoadedObjectList.Add(data);
             }
         }
         else if (data.Flag == SeparateEntity.CreateFlag.None) //如果发生触发的物体未创建则创建该物体并加入已加载的物体列表
@@ -222,9 +222,9 @@ public class SceneObjectLoadController : MonoBehaviour
     private void DoCreateInternal(SeparateEntity data)
     {
         //加入已加载列表
-        m_LoadedObjectList.Add(data);
+        mLoadedObjectList.Add(data);
         //创建物体
-        CreateObject(data, m_Asyn);
+        CreateObject(data, mIsAsyn);
     }
 
     /// <summary>
@@ -232,30 +232,30 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     void MarkOutofBoundsObjs()
     {
-        if (m_LoadedObjectList == null)
+        if (mLoadedObjectList == null)
             return;
         int i = 0;
-        while (i < m_LoadedObjectList.Count)
+        while (i < mLoadedObjectList.Count)
         {
-            if (m_LoadedObjectList[i].Flag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
+            if (mLoadedObjectList[i].Flag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
             {
-                m_LoadedObjectList[i].Flag = SeparateEntity.CreateFlag.OutofBounds;
+                mLoadedObjectList[i].Flag = SeparateEntity.CreateFlag.OutofBounds;
                 //m_PreDestroyObjectList.Add(m_LoadedObjectList[i]);
-                if (m_MinCreateCount == 0)//如果最小创建数为0直接删除
+                if (mMinCreateCount == 0)//如果最小创建数为0直接删除
                 {
-                    DestroyObject(m_LoadedObjectList[i], m_Asyn);
+                    DestroyObject(mLoadedObjectList[i], mIsAsyn);
                 }
                 else
                 {
                     //m_PreDestroyObjectQueue.Enqueue(m_LoadedObjectList[i]);
-                    m_PreDestroyObjectQueue.Push(m_LoadedObjectList[i]);//加入待删除队列
+                    mPreDestroyObjectQueue.Push(mLoadedObjectList[i]);//加入待删除队列
                 }
-                m_LoadedObjectList.RemoveAt(i);
+                mLoadedObjectList.RemoveAt(i);
 
             }
             else
             {
-                m_LoadedObjectList[i].Flag = SeparateEntity.CreateFlag.Old;//其它物体标记为旧
+                mLoadedObjectList[i].Flag = SeparateEntity.CreateFlag.Old;//其它物体标记为旧
                 i++;
             }
         }
@@ -266,16 +266,16 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     void DestroyOutOfBoundsObjs()
     {
-        while(m_PreDestroyObjectQueue.Count>m_MinCreateCount)
+        while(mPreDestroyObjectQueue.Count>mMinCreateCount)
         {
 
             //var obj = m_PreDestroyObjectQueue.Dequeue();
-            var obj = m_PreDestroyObjectQueue.Pop();
+            var obj = mPreDestroyObjectQueue.Pop();
             if (obj == null)
                 continue;
             if (obj.Flag == SeparateEntity.CreateFlag.OutofBounds)
             {
-                DestroyObject(obj, m_Asyn);
+                DestroyObject(obj, mIsAsyn);
             }
         }
     }
@@ -285,19 +285,19 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void CreateObject(SeparateEntity obj, bool asyn)
+    private void CreateObject(SeparateEntity entity, bool asyn)
     {
-        if (obj == null)
+        if (entity == null)
             return;
-        if (obj.TargetObj == null)
+        if (entity.TargetEntity == null)
             return;
-        if (obj.Flag == SeparateEntity.CreateFlag.None)
+        if (entity.Flag == SeparateEntity.CreateFlag.None)
         {
             if (!asyn)
-                CreateObjectSync(obj);
+                CreateObjectSync(entity);
             else
-                ProcessObjectAsyn(obj, true);
-            obj.Flag = SeparateEntity.CreateFlag.New;//被创建的物体标记为New
+                ProcessObjectAsyn(entity, true);
+            entity.Flag = SeparateEntity.CreateFlag.New;//被创建的物体标记为New
         }
     }
 
@@ -312,7 +312,7 @@ public class SceneObjectLoadController : MonoBehaviour
             return;
         if (obj.Flag == SeparateEntity.CreateFlag.None)
             return;
-        if (obj.TargetObj == null)
+        if (obj.TargetEntity == null)
             return;
         if (!asyn)
             DestroyObjectSync(obj);
@@ -378,10 +378,10 @@ public class SceneObjectLoadController : MonoBehaviour
                 return;
             obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.IsPrepareDestroy;//设置为等待开始销毁
         }
-        if (m_ProcessTaskQueue == null)
-            m_ProcessTaskQueue = new Queue<SeparateEntity>();
-        m_ProcessTaskQueue.Enqueue(obj);//加入
-        if (!m_IsTaskRunning)
+        if (mProcessTaskQueue == null)
+            mProcessTaskQueue = new Queue<SeparateEntity>();
+        mProcessTaskQueue.Enqueue(obj);//加入
+        if (!mIsTaskRunning)
         {
             StartCoroutine(AsynTaskProcess());//开始协程执行异步任务
         }
@@ -393,12 +393,12 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator AsynTaskProcess()
     {
-        if (m_ProcessTaskQueue == null)
+        if (mProcessTaskQueue == null)
             yield return 0;
-        m_IsTaskRunning = true;
-        while (m_ProcessTaskQueue.Count > 0)
+        mIsTaskRunning = true;
+        while (mProcessTaskQueue.Count > 0)
         {
-            var obj = m_ProcessTaskQueue.Dequeue();
+            var obj = mProcessTaskQueue.Dequeue();
             if (obj != null)
             {
                 if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//等待创建
@@ -406,22 +406,22 @@ public class SceneObjectLoadController : MonoBehaviour
                     obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                     if (obj.OnShow(transform))
                     {
-                        if (m_WaitForFrame == null)
-                            m_WaitForFrame = new WaitForEndOfFrame();
-                        yield return m_WaitForFrame;
+                        if (mWaitForFrame == null)
+                            mWaitForFrame = new WaitForEndOfFrame();
+                        yield return mWaitForFrame;
                     }
                 }
                 else if (obj.ProcessFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//等待销毁
                 {
                     obj.ProcessFlag = SeparateEntity.CreatingProcessFlag.None;
                     obj.OnHide();
-                    if (m_WaitForFrame == null)
-                        m_WaitForFrame = new WaitForEndOfFrame();
-                    yield return m_WaitForFrame;
+                    if (mWaitForFrame == null)
+                        mWaitForFrame = new WaitForEndOfFrame();
+                    yield return mWaitForFrame;
                 }
             }
         }
-        m_IsTaskRunning = false;
+        mIsTaskRunning = false;
     }
 
     private class SceneObjectWeightComparer : IComparer<SeparateEntity>
@@ -447,8 +447,8 @@ public class SceneObjectLoadController : MonoBehaviour
         Color maxdcolor = new Color32(133, 165, 255, 255);
         Color objcolor = new Color32(0, 210, 255, 255);
         Color hitcolor = new Color32(255, 216, 0, 255);
-        if (m_QuadTree != null)
-            m_QuadTree.DrawTree(mindcolor, maxdcolor, objcolor, hitcolor, debug_DrawMinDepth, debug_DrawMaxDepth, debug_DrawObj);
+        if (mSeparateTree != null)
+            mSeparateTree.DrawTree(mindcolor, maxdcolor, objcolor, hitcolor, debug_DrawMinDepth, debug_DrawMaxDepth, debug_DrawObj);
     }
 #endif
 }

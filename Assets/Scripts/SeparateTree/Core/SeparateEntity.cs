@@ -51,58 +51,58 @@ public class SeparateEntity : ISeparateEntity, ILinkedListNode
     /// </summary>
     public Bounds Bounds
     {
-        get { return m_TargetObj.Bounds; }
+        get { return mTargetEntity.Bounds; }
     }
 
     public float Weight
     {
-        get { return m_Weight; }
-        set { m_Weight = value; }
+        get { return mWeight; }
+        set { mWeight = value; }
     }
 
     /// <summary>
     /// 被包装的实际用于动态加载和销毁的场景物体
     /// </summary>
-    public ISeparateEntity TargetObj
+    public ISeparateEntity TargetEntity
     {
-        get { return m_TargetObj; }
+        get { return mTargetEntity; }
     }
 
     public CreateFlag Flag { get; set; }
 
     public CreatingProcessFlag ProcessFlag { get; set; }
 
-    private ISeparateEntity m_TargetObj;
+    private ISeparateEntity mTargetEntity;
 
-    private float m_Weight;
+    private float mWeight;
 
-    private object m_Node;
+    private object mNode;
 
-    public SeparateEntity(ISeparateEntity obj)
+    public SeparateEntity(ISeparateEntity entity)
     {
-        m_Weight = 0;
-        m_TargetObj = obj;
+        mWeight = 0;
+        mTargetEntity = entity;
     }
 
     public LinkedListNode<T> GetLinkedListNode<T>() where T : ISeparateEntity
     {
-        return (LinkedListNode<T>)m_Node;
+        return (LinkedListNode<T>)mNode;
     }
 
     public void SetLinkedListNode<T>(LinkedListNode<T> node)
     {
-        m_Node = node;
+        mNode = node;
     }
 
     public void OnHide()
     {
         Weight = 0;
-        m_TargetObj.OnHide();
+        mTargetEntity.OnHide();
     }
 
     public bool OnShow(Transform parent)
     {
-        return m_TargetObj.OnShow(parent);
+        return mTargetEntity.OnShow(parent);
     }
 
 #if UNITY_EDITOR
@@ -110,10 +110,10 @@ public class SeparateEntity : ISeparateEntity, ILinkedListNode
     {
         if (Flag == CreateFlag.New || Flag == CreateFlag.Old)
         {
-            m_TargetObj.Bounds.DrawBounds(hitColor);
+            mTargetEntity.Bounds.DrawBounds(hitColor);
         }
         else 
-        m_TargetObj.Bounds.DrawBounds(color);
+        mTargetEntity.Bounds.DrawBounds(color);
     }
 #endif
 }
