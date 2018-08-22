@@ -7,9 +7,10 @@ public class Example : MonoBehaviour
 {
     public string desc;
 
+    [SerializeField]
     public List<SceneEntity> entities;
 
-    private Bounds mBounds = new Bounds(Vector3.zero, Vector3.one * 50);
+    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(100,0,100));
 
     public Bounds bounds
     {
@@ -29,8 +30,6 @@ public class Example : MonoBehaviour
     public void Size(Vector3 size)
     {
         mBounds.size = size;
-        mBounds.extents = new Vector3(size.x, -size.y, size.z) * 0.5f;
-      
     }
 
     void Start()
@@ -40,6 +39,15 @@ public class Example : MonoBehaviour
             mController = gameObject.AddComponent<SeparateEntityController>();
         mController.Init(bounds.center, bounds.size, asyn, SeparateTreeType.QuadTree);
 
+        entities.Clear();
+        for(int i = 0; i < transform.childCount; ++i)
+        {
+            var entity = transform.GetChild(i).GetComponent<SceneEntity>();
+            if(entity)
+            {
+                AddEntity(entity);
+            }
+        }
 
         for (int i = 0; i < entities.Count; i++)
         {

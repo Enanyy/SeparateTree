@@ -5,7 +5,7 @@ public class SceneEntity:MonoBehaviour,IEntity
 {
     [HideInInspector]
     [SerializeField]
-    private Bounds mBounds = new Bounds(Vector3.zero, Vector3.one * 2);
+    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(2,0,2));
     [HideInInspector]
     [SerializeField]
     public string mPath = "Prefabs/";

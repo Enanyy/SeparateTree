@@ -92,7 +92,7 @@ public class SeparateEntityController : MonoBehaviour
     /// <param name="asyn">是否异步</param>
     public void Init(Vector3 center, Vector3 size, bool asyn, SeparateTreeType treeType)
     {
-        Init(center, size, asyn, 25, 15, 1, 5, treeType);
+        Init(center, size, asyn, 25, 0, 1, 5, treeType);
     }
 
     /// <summary>
