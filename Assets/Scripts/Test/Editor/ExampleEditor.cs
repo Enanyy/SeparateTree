@@ -39,13 +39,13 @@ public class ExampleEditor : Editor
 
         for (int i = 0; i < list.Count; i++)
         {
-            maxX = Mathf.Max(list[i].Bounds.max.x, maxX);
-            maxY = Mathf.Max(list[i].Bounds.max.y, maxY);
-            maxZ = Mathf.Max(list[i].Bounds.max.z, maxZ);
+            maxX = Mathf.Max(list[i].bounds.max.x, maxX);
+            maxY = Mathf.Max(list[i].bounds.max.y, maxY);
+            maxZ = Mathf.Max(list[i].bounds.max.z, maxZ);
 
-            minX = Mathf.Min(list[i].Bounds.min.x, minX);
-            minY = Mathf.Min(list[i].Bounds.min.y, minY);
-            minZ = Mathf.Min(list[i].Bounds.min.z, minZ);
+            minX = Mathf.Min(list[i].bounds.min.x, minX);
+            minY = Mathf.Min(list[i].bounds.min.y, minY);
+            minZ = Mathf.Min(list[i].bounds.min.z, minZ);
         }
         Vector3 size = new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
         Vector3 center = new Vector3(minX + size.x/2, minY + size.y/2, minZ + size.z/2);

@@ -49,14 +49,14 @@ public class SeparateEntity : IEntity
     /// <summary>
     /// 场景物体包围盒
     /// </summary>
-    public Bounds Bounds
+    public Bounds bounds
     {
-        get { return mTargetEntity.Bounds; }
+        get { return mTargetEntity.bounds; }
     }
 
-    public SeparateTreeNode Node { get; set; }
+    public SeparateTreeNode node { get; set; }
 
-    public float Weight
+    public float weight
     {
         get { return mWeight; }
         set { mWeight = value; }
@@ -65,14 +65,14 @@ public class SeparateEntity : IEntity
     /// <summary>
     /// 被包装的实际用于动态加载和销毁的场景物体
     /// </summary>
-    public IEntity TargetEntity
+    public IEntity targetEntity
     {
         get { return mTargetEntity; }
     }
 
-    public CreateFlag Flag { get; set; }
+    public CreateFlag createFlag { get; set; }
 
-    public CreatingProcessFlag ProcessFlag { get; set; }
+    public CreatingProcessFlag processFlag { get; set; }
 
     private IEntity mTargetEntity;
 
@@ -87,7 +87,7 @@ public class SeparateEntity : IEntity
    
     public void OnHide()
     {
-        Weight = 0;
+        weight = 0;
         mTargetEntity.OnHide();
     }
 
@@ -99,12 +99,12 @@ public class SeparateEntity : IEntity
 #if UNITY_EDITOR
     public void DrawEntity(Color color, Color hitColor)
     {
-        if (Flag == CreateFlag.New || Flag == CreateFlag.Old)
+        if (createFlag == CreateFlag.New || createFlag == CreateFlag.Old)
         {
-            mTargetEntity.Bounds.DrawBounds(hitColor);
+            mTargetEntity.bounds.DrawBounds(hitColor);
         }
         else 
-        mTargetEntity.Bounds.DrawBounds(color);
+        mTargetEntity.bounds.DrawBounds(color);
     }
 #endif
 }

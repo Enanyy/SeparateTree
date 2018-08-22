@@ -16,5 +16,5 @@ public interface IDetector
     /// <summary>
     /// 触发器位置
     /// </summary>
-    Vector3 Position { get; }
+    Vector3 position { get; }
 }

@@ -7,7 +7,7 @@ public class SeparateTreeNode
     /// <summary>
     /// 节点包围盒
     /// </summary>
-    public Bounds Bounds
+    public Bounds bounds
     {
         get { return mBounds; }
     }
@@ -15,7 +15,7 @@ public class SeparateTreeNode
     /// <summary>
     /// 节点当前深度
     /// </summary>
-    public int Depth
+    public int depth
     {
         get { return mDepth; }
     }
@@ -23,7 +23,7 @@ public class SeparateTreeNode
     /// <summary>
     /// 节点数据列表
     /// </summary>
-    public LinkedList<IEntity> Entities
+    public LinkedList<IEntity> entities
     {
         get { return mEntities; }
     }
@@ -32,62 +32,73 @@ public class SeparateTreeNode
 
     private Bounds mBounds;
 
-    private Vector3 mHalfSize;
-
     private LinkedList<IEntity> mEntities;
 
-    protected SeparateTreeNode[] mChildNodes;
+    private int mChildCount = 0;
+    protected SeparateTreeNode[] mChildren;
 
     public SeparateTreeNode(Bounds bounds, int depth, int childCount)
     {
         mBounds = bounds;
         mDepth = depth;
+        mChildCount = childCount;
         mEntities = new LinkedList<IEntity>();
-        mChildNodes = new SeparateTreeNode[childCount];
-
-        if (childCount == 8)
-            mHalfSize = new Vector3(mBounds.size.x / 2, mBounds.size.y / 2, mBounds.size.z / 2);
-        else
-            mHalfSize = new Vector3(mBounds.size.x / 2, mBounds.size.y, mBounds.size.z / 2);
     }
 
     public void Clear()
     {
-        for (int i = 0; i < mChildNodes.Length; i++)
+        if (mChildren != null)
         {
-            if (mChildNodes[i] != null)
-                mChildNodes[i].Clear();
+            for (int i = 0; i < mChildren.Length; i++)
+            {
+                if (mChildren[i] != null)
+                {
+                    mChildren[i].Clear();
+                }
+            }
         }
+
         if (mEntities != null)
+        {
             mEntities.Clear();
+        }
     }
 
     public bool Contains(IEntity entity)
-    {
-        for (int i = 0; i < mChildNodes.Length; i++)
+    {   
+        if (mChildren != null)
         {
-            if (mChildNodes[i] != null && mChildNodes[i].Contains(entity))
-                return true;
+            for (int i = 0; i < mChildren.Length; i++)
+            {
+                if (mChildren[i] != null && mChildren[i].Contains(entity))
+                    return true;
+            }
         }
-
         if (mEntities != null && mEntities.Contains(entity))
+        {
             return true;
+        }
         return false;
     }
 
     public SeparateTreeNode Insert(IEntity entity, int depth, int maxDepth)
     {
         if (mEntities.Contains(entity))
+        {
             return this;
+        }
+
         if (depth < maxDepth)
         {
             SeparateTreeNode node = GetContainerNode(entity, depth);
             if (node != null)
+            {
                 return node.Insert(entity, depth + 1, maxDepth);
+            }
         }
         mEntities.AddFirst(entity);
 
-        entity.Node = this;
+        entity.node = this;
 
         return this;
     }
@@ -98,13 +109,13 @@ public class SeparateTreeNode
         {
            return mEntities.Remove(entity);
         }
-        else
+        else if(mChildren!=null)
         {
-            for (int i = 0; i < mChildNodes.Length; i++)
+            for (int i = 0; i < mChildren.Length; i++)
             {
-                if (mChildNodes[i] != null)
+                if (mChildren[i] != null)
                 {
-                    if(mChildNodes[i].Remove(entity))
+                    if(mChildren[i].Remove(entity))
                     {
                         return true;
                     }
@@ -119,11 +130,16 @@ public class SeparateTreeNode
         if (handle == null)
             return;
 
-        for (int i = 0; i < mChildNodes.Length; i++)
+        if (mChildren != null)
         {
-            var node = mChildNodes[i];
-            if (node != null)
-                node.Trigger(detector, handle);
+            for (int i = 0; i < mChildren.Length; i++)
+            {
+                var node = mChildren[i];
+                if (node != null)
+                {
+                    node.Trigger(detector, handle);
+                }
+            }
         }
 
         if (detector.IsDetected(mBounds))
@@ -131,8 +147,11 @@ public class SeparateTreeNode
             var node = mEntities.First;
             while (node != null)
             {
-                if (detector.IsDetected(node.Value.Bounds))
+                if (detector.IsDetected(node.Value.bounds))
+                {
                     handle(node.Value);
+                }
+
                 node = node.Next;
             }
         }
@@ -143,19 +162,35 @@ public class SeparateTreeNode
         SeparateTreeNode result = null;
         int ix = -1;
         int iz = -1;
-        int iy = mChildNodes.Length == 4 ? 0 : -1;
+
+        int iy = mChildCount == 4 ? 0 : -1;
+
+        if(mChildren == null)
+        {
+            mChildren = new SeparateTreeNode[mChildCount];
+        }
 
         int nodeIndex = 0;
+
+        Vector3 halfSize = halfSize = new Vector3(mBounds.size.x / 2, mChildCount == 4? mBounds.size.y : mBounds.size.y / 2, mBounds.size.z / 2);
+        
         for (int i = ix; i <= 1; i += 2) //i = -1, 1
         {
             for (int j = iz; j <= 1; j += 2) //j = -1, 1
             {
                 for (int k = iy; k <= 1; k += 2) //k = 4 or -1,1
                 {
-                    result = CreateNode(ref mChildNodes[nodeIndex], depth, mBounds.center + new Vector3(i* mHalfSize.x / 2, k*mHalfSize.y/2, j* mHalfSize.z / 2),
-            mHalfSize, entity);
+                    result = CreateNode(ref mChildren[nodeIndex],
+                                        depth,
+                                        mBounds.center + new Vector3(i * halfSize.x / 2, k * halfSize.y / 2, j * halfSize.z / 2),
+                                        halfSize,
+                                        entity);
+
                     if (result != null)
+                    {
                         return result;
+                    }
+
                     nodeIndex += 1;
                 }
             }
@@ -169,14 +204,14 @@ public class SeparateTreeNode
         if (node == null)
         {
             Bounds bounds = new Bounds(center, size);
-            if (bounds.IsBoundsContainsAnotherBounds(entity.Bounds))
+            if (bounds.IsBoundsContainsAnotherBounds(entity.bounds))
             {
-                SeparateTreeNode newNode = new SeparateTreeNode(bounds, depth + 1, mChildNodes.Length);
+                SeparateTreeNode newNode = new SeparateTreeNode(bounds, depth + 1, mChildren.Length);
                 node = newNode;
                 result = node;
             }
         }
-        else if (node.Bounds.IsBoundsContainsAnotherBounds(entity.Bounds))
+        else if (node.bounds.IsBoundsContainsAnotherBounds(entity.bounds))
         {
             result = node;
         }
@@ -186,11 +221,11 @@ public class SeparateTreeNode
 #if UNITY_EDITOR
     public void DrawNode(Color treeMinDepthColor, Color treeMaxDepthColor, Color objColor, Color hitObjColor, int drawMinDepth, int drawMaxDepth, bool drawEntity, int maxDepth)
     {
-        if (mChildNodes != null)
+        if (mChildren != null)
         {
-            for (int i = 0; i < mChildNodes.Length; i++)
+            for (int i = 0; i < mChildren.Length; i++)
             {
-                var node = mChildNodes[i];
+                var node = mChildren[i];
                 if (node != null)
                     node.DrawNode(treeMinDepthColor, treeMaxDepthColor, objColor, hitObjColor, drawMinDepth, drawMaxDepth, drawEntity, maxDepth);
             }
@@ -208,9 +243,11 @@ public class SeparateTreeNode
             var node = mEntities.First;
             while (node != null)
             {
-                var sceneobj = node.Value as SeparateEntity;
-                if (sceneobj != null)
-                    sceneobj.DrawEntity(objColor, hitObjColor);
+                var entity = node.Value ;
+                if (entity != null)
+                {
+                    entity.bounds.DrawBounds(objColor);
+                }
                 node = node.Next;
             }  
         }

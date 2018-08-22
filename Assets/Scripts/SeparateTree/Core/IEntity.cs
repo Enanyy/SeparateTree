@@ -10,12 +10,12 @@ public interface IEntity
     /// <summary>
     /// 该物体的包围盒
     /// </summary>
-    Bounds Bounds { get; }
+    Bounds bounds { get; }
 
     /// <summary>
     /// 该物体所在的节点
     /// </summary>
-    SeparateTreeNode Node { get; set; }
+    SeparateTreeNode node { get; set; }
 
     /// <summary>
     /// 该物体进入显示区域时调用（在这里处理物体的加载或显示）

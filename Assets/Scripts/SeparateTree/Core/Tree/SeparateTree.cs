@@ -12,22 +12,22 @@ public enum SeparateTreeType
 public class SeparateTree
 {
 
-    public Bounds Bounds
+    public Bounds bounds
     {
         get
         {
             if (mRoot != null)
-                return mRoot.Bounds;
+                return mRoot.bounds;
             return default(Bounds);
         }
     }
 
-    public int MaxDepth
+    public int maxDepth
     {
         get { return mMaxDepth; }
     }
 
-    public SeparateTreeType TreeType { get { return mTreeType; } }
+    public SeparateTreeType treeType { get { return mTreeType; } }
 
     /// <summary>
     /// 根节点

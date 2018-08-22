@@ -3,7 +3,7 @@ using System.Collections;
 
 public abstract class SeparateDetector : MonoBehaviour, IDetector
 {
-    public Vector3 Position
+    public Vector3 position
     {
         get { return transform.position; }
     }

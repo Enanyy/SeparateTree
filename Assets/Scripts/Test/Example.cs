@@ -21,12 +21,12 @@ public class TestSceneObject : IEntity
 
     private GameObject mLoadedPrefab;
 
-    public Bounds Bounds
+    public Bounds bounds
     {
         get { return mBounds; }
     }
 
-    public SeparateTreeNode Node { get; set; }
+    public SeparateTreeNode node { get; set; }
 
     public void OnHide()
     {

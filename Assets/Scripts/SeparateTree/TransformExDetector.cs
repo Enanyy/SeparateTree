@@ -52,7 +52,7 @@ public class TransformExDetector : SeparateDetector
 
     public override bool IsDetected(Bounds bounds)
     {
-        mBounds.center = Position + mPosOffset;
+        mBounds.center = position + mPosOffset;
         mBounds.size = detectorSize + mSizeEx;
         return bounds.Intersects(mBounds);
     }
