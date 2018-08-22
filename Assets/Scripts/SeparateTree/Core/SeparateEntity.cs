@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 场景物件（用来包装实际用于动态加载的物体）
 /// </summary>
-public class SeparateEntity : ISeparateEntity, ILinkedListNode
+public class SeparateEntity : IEntity
 {
     /// <summary>
     /// 场景物件创建标记
@@ -54,6 +54,8 @@ public class SeparateEntity : ISeparateEntity, ILinkedListNode
         get { return mTargetEntity.Bounds; }
     }
 
+    public SeparateTreeNode Node { get; set; }
+
     public float Weight
     {
         get { return mWeight; }
@@ -63,7 +65,7 @@ public class SeparateEntity : ISeparateEntity, ILinkedListNode
     /// <summary>
     /// 被包装的实际用于动态加载和销毁的场景物体
     /// </summary>
-    public ISeparateEntity TargetEntity
+    public IEntity TargetEntity
     {
         get { return mTargetEntity; }
     }
@@ -72,41 +74,30 @@ public class SeparateEntity : ISeparateEntity, ILinkedListNode
 
     public CreatingProcessFlag ProcessFlag { get; set; }
 
-    private ISeparateEntity mTargetEntity;
+    private IEntity mTargetEntity;
 
     private float mWeight;
 
-    private object mNode;
-
-    public SeparateEntity(ISeparateEntity entity)
+    public SeparateEntity(IEntity entity)
     {
         mWeight = 0;
         mTargetEntity = entity;
     }
 
-    public LinkedListNode<T> GetLinkedListNode<T>() where T : ISeparateEntity
-    {
-        return (LinkedListNode<T>)mNode;
-    }
-
-    public void SetLinkedListNode<T>(LinkedListNode<T> node)
-    {
-        mNode = node;
-    }
-
+   
     public void OnHide()
     {
         Weight = 0;
         mTargetEntity.OnHide();
     }
 
-    public bool OnShow(Transform parent)
+    public bool OnShow()
     {
-        return mTargetEntity.OnShow(parent);
+        return mTargetEntity.OnShow();
     }
 
 #if UNITY_EDITOR
-    public void DrawArea(Color color, Color hitColor)
+    public void DrawEntity(Color color, Color hitColor)
     {
         if (Flag == CreateFlag.New || Flag == CreateFlag.Old)
         {

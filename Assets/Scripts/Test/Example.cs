@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// 测试场景物体-实际应用中可以根据需求增加或修改，只需实现ISceneObject接口即可
+/// 测试场景物体-实际应用中可以根据需求增加或修改，只需实现IEntity接口即可
 /// </summary>
 [System.Serializable]
-public class TestSceneObject : ISeparateEntity
+public class TestSceneObject : IEntity
 {
     [SerializeField]
     private Bounds mBounds;
@@ -26,6 +26,8 @@ public class TestSceneObject : ISeparateEntity
         get { return mBounds; }
     }
 
+    public SeparateTreeNode Node { get; set; }
+
     public void OnHide()
     {
         if (mLoadedPrefab)
@@ -36,13 +38,12 @@ public class TestSceneObject : ISeparateEntity
         }
     }
 
-    public bool OnShow(Transform parent)
+    public bool OnShow()
     {
         if (mLoadedPrefab == null)
         {
             var obj = TestResManager.Load(mResPath);
             mLoadedPrefab = UnityEngine.Object.Instantiate<GameObject>(obj);
-            mLoadedPrefab.transform.SetParent(parent);
             mLoadedPrefab.transform.position = mPosition;
             mLoadedPrefab.transform.eulerAngles = mRotation;
             mLoadedPrefab.transform.localScale = mSize;

@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public delegate void TriggerHandler<T>(T trigger);
+public delegate void TriggerHandler(IEntity trigger);
 
 public enum SeparateTreeType
 {
-    OcTree,
-    QuadTree,
+    OcTree, //八叉树
+    QuadTree, //四叉树
 }
 
-public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
+public class SeparateTree
 {
 
     public Bounds Bounds
@@ -27,12 +27,12 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
         get { return mMaxDepth; }
     }
 
-    public SeparateTreeType CurrentTreeType { get { return mTreeType; } }
+    public SeparateTreeType TreeType { get { return mTreeType; } }
 
     /// <summary>
     /// 根节点
     /// </summary>
-    private SeparateTreeNode<T> mRoot;
+    private SeparateTreeNode mRoot;
 
     /// <summary>
     /// 最大深度
@@ -50,17 +50,15 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
     /// <param name="maxDepth">树最大深度</param>
     public SeparateTree(SeparateTreeType treeType, Vector3 center, Vector3 size, int maxDepth)
     {
-        this.mTreeType = treeType;
-        this.mMaxDepth = maxDepth;
-        if (treeType == SeparateTreeType.QuadTree)
-            this.mRoot = new SeparateTreeNode<T>(new Bounds(center, size), 0, 4);
-        else
-            this.mRoot = new SeparateTreeNode<T>(new Bounds(center, size), 0, 8);
+        mTreeType = treeType;
+        mMaxDepth = maxDepth;
+
+        mRoot = new SeparateTreeNode(new Bounds(center, size), 0, mTreeType == SeparateTreeType.QuadTree ? 4 : 8);
     }
 
-    public void Add(T item)
+    public void Add(IEntity entity)
     {
-        mRoot.Insert(item, 0, mMaxDepth);
+        mRoot.Insert(entity, 0, mMaxDepth);
     }
 
     public void Clear()
@@ -68,24 +66,24 @@ public class SeparateTree<T> where T : ISeparateEntity, ILinkedListNode
         mRoot.Clear();
     }
 
-    public bool Contains(T item)
+    public bool Contains(IEntity entity)
     {
-        return mRoot.Contains(item);
+        return mRoot.Contains(entity);
     }
 
-    public void Remove(T item)
+    public void Remove(IEntity entity)
     {
-         mRoot.Remove(item);
+         mRoot.Remove(entity);
     }
 
-    public void Trigger(IDetector detector, TriggerHandler<T> handle)
+    public void Trigger(IDetector detector, TriggerHandler handle)
     {
         if (handle == null)
             return;
         mRoot.Trigger(detector, handle);
     }
 
-    public static implicit operator bool(SeparateTree<T> tree)
+    public static implicit operator bool(SeparateTree tree)
     {
         return tree != null;
     }
