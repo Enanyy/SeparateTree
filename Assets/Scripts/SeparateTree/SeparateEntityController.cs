@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 场景物件加载控制器
 /// </summary>
-public class SceneObjectLoadController : MonoBehaviour
+public class SeparateEntityController : MonoBehaviour
 {
 
     private WaitForEndOfFrame mWaitForFrame;
@@ -35,12 +35,12 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <summary>
     /// 已加载的物体列表
     /// </summary>
-    private List<SeparateEntity> mLoadedObjectList;
+    private List<SeparateEntity> mLoadedEntityList;
 
     /// <summary>
     /// 待销毁物体列表
     /// </summary>
-    private PriorityQueue<SeparateEntity> mPreDestroyObjectQueue;
+    private PriorityQueue<SeparateEntity> mPreDestroyQueue;
 
     private bool mIsTaskRunning;
 
@@ -70,8 +70,8 @@ public class SceneObjectLoadController : MonoBehaviour
         if (mIsInitialized)
             return;
         mSeparateTree = new SeparateTree(treeType, center, size, quadTreeDepth);
-        mLoadedObjectList = new List<SeparateEntity>();
-        mPreDestroyObjectQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
+        mLoadedEntityList = new List<SeparateEntity>();
+        mPreDestroyQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
 
         mMaxCreateCount = Mathf.Max(0, maxCreateCount);
         mMinCreateCount = Mathf.Clamp(minCreateCount, 0, mMaxCreateCount);
@@ -115,17 +115,17 @@ public class SceneObjectLoadController : MonoBehaviour
         mSeparateTree = null;
         if (mProcessTaskQueue != null)
             mProcessTaskQueue.Clear();
-        if (mLoadedObjectList != null)
-            mLoadedObjectList.Clear();
+        if (mLoadedEntityList != null)
+            mLoadedEntityList.Clear();
         mProcessTaskQueue = null;
-        mLoadedObjectList = null;
+        mLoadedEntityList = null;
     }
 
     /// <summary>
     /// 添加场景物体
     /// </summary>
     /// <param name="obj"></param>
-    public void AddSceneBlockObject(IEntity entity)
+    public void AddSceneEntity(IEntity entity)
     {
         if (!mIsInitialized)
             return;
@@ -139,7 +139,7 @@ public class SceneObjectLoadController : MonoBehaviour
         //如果当前触发器存在，直接物体是否可触发，如果可触发，则创建物体
         if (mDetector != null && mDetector.IsDetected(se.bounds))
         {
-            DoCreateInternal(se);
+            CreateInternal(se);
         }
     }
 
@@ -164,13 +164,13 @@ public class SceneObjectLoadController : MonoBehaviour
                 //进行触发检测
                 mSeparateTree.Trigger(detector, OnTrigger);
                 //标记超出区域的物体
-                MarkOutofBoundsObjs();
+                MarkOutofBoundsEntity();
                 //m_IsInitLoadComplete = true;
             }
         }
         if (mOldDestroyRefreshPosition != detector.position)
         {
-            if(mPreDestroyObjectQueue != null && mPreDestroyObjectQueue.Count >= mMaxCreateCount && mPreDestroyObjectQueue.Count > mMinCreateCount)
+            if(mPreDestroyQueue != null && mPreDestroyQueue.Count >= mMaxCreateCount && mPreDestroyQueue.Count > mMinCreateCount)
             //if (m_PreDestroyObjectList != null && m_PreDestroyObjectList.Count >= m_MaxCreateCount)
             {
                 mDestroyRefreshTime += Time.deltaTime;
@@ -179,7 +179,7 @@ public class SceneObjectLoadController : MonoBehaviour
                     mOldDestroyRefreshPosition = detector.position;
                     mDestroyRefreshTime = 0;
                     //删除超出区域的物体
-                    DestroyOutOfBoundsObjs();
+                    DestroyOutOfBoundsEntity();
                 }
             }
         }
@@ -207,53 +207,53 @@ public class SceneObjectLoadController : MonoBehaviour
             entity.createFlag = SeparateEntity.CreateFlag.New;
             //if (m_PreDestroyObjectList.Remove(data))
             {
-                mLoadedObjectList.Add(entity);
+                mLoadedEntityList.Add(entity);
             }
         }
         else if (entity.createFlag == SeparateEntity.CreateFlag.None) //如果发生触发的物体未创建则创建该物体并加入已加载的物体列表
         {
-            DoCreateInternal(entity);
+            CreateInternal(entity);
         }
     }
 
     //执行创建物体
-    private void DoCreateInternal(SeparateEntity data)
+    private void CreateInternal(SeparateEntity data)
     {
         //加入已加载列表
-        mLoadedObjectList.Add(data);
+        mLoadedEntityList.Add(data);
         //创建物体
-        CreateObject(data, mIsAsyn);
+        CreateEntity(data, mIsAsyn);
     }
 
     /// <summary>
     /// 标记离开视野的物体
     /// </summary>
-    void MarkOutofBoundsObjs()
+    void MarkOutofBoundsEntity()
     {
-        if (mLoadedObjectList == null)
+        if (mLoadedEntityList == null)
             return;
         int i = 0;
-        while (i < mLoadedObjectList.Count)
+        while (i < mLoadedEntityList.Count)
         {
-            if (mLoadedObjectList[i].createFlag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
+            if (mLoadedEntityList[i].createFlag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
             {
-                mLoadedObjectList[i].createFlag = SeparateEntity.CreateFlag.OutofBounds;
+                mLoadedEntityList[i].createFlag = SeparateEntity.CreateFlag.OutofBounds;
                 //m_PreDestroyObjectList.Add(m_LoadedObjectList[i]);
                 if (mMinCreateCount == 0)//如果最小创建数为0直接删除
                 {
-                    DestroyObject(mLoadedObjectList[i], mIsAsyn);
+                    DestroyEntity(mLoadedEntityList[i], mIsAsyn);
                 }
                 else
                 {
                     //m_PreDestroyObjectQueue.Enqueue(m_LoadedObjectList[i]);
-                    mPreDestroyObjectQueue.Push(mLoadedObjectList[i]);//加入待删除队列
+                    mPreDestroyQueue.Push(mLoadedEntityList[i]);//加入待删除队列
                 }
-                mLoadedObjectList.RemoveAt(i);
+                mLoadedEntityList.RemoveAt(i);
 
             }
             else
             {
-                mLoadedObjectList[i].createFlag = SeparateEntity.CreateFlag.Old;//其它物体标记为旧
+                mLoadedEntityList[i].createFlag = SeparateEntity.CreateFlag.Old;//其它物体标记为旧
                 i++;
             }
         }
@@ -262,18 +262,18 @@ public class SceneObjectLoadController : MonoBehaviour
     /// <summary>
     /// 删除超出区域外的物体
     /// </summary>
-    void DestroyOutOfBoundsObjs()
+    void DestroyOutOfBoundsEntity()
     {
-        while(mPreDestroyObjectQueue.Count>mMinCreateCount)
+        while(mPreDestroyQueue.Count>mMinCreateCount)
         {
 
             //var obj = m_PreDestroyObjectQueue.Dequeue();
-            var obj = mPreDestroyObjectQueue.Pop();
+            var obj = mPreDestroyQueue.Pop();
             if (obj == null)
                 continue;
             if (obj.createFlag == SeparateEntity.CreateFlag.OutofBounds)
             {
-                DestroyObject(obj, mIsAsyn);
+                DestroyEntity(obj, mIsAsyn);
             }
         }
     }
@@ -283,7 +283,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void CreateObject(SeparateEntity entity, bool asyn)
+    private void CreateEntity(SeparateEntity entity, bool asyn)
     {
         if (entity == null)
             return;
@@ -292,9 +292,9 @@ public class SceneObjectLoadController : MonoBehaviour
         if (entity.createFlag == SeparateEntity.CreateFlag.None)
         {
             if (!asyn)
-                CreateObjectSync(entity);
+                CreateEntitySync(entity);
             else
-                ProcessObjectAsyn(entity, true);
+                ProcessEntityAsyn(entity, true);
             entity.createFlag = SeparateEntity.CreateFlag.New;//被创建的物体标记为New
         }
     }
@@ -304,7 +304,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void DestroyObject(SeparateEntity obj, bool asyn)
+    private void DestroyEntity(SeparateEntity obj, bool asyn)
     {
         if (obj == null)
             return;
@@ -313,9 +313,9 @@ public class SceneObjectLoadController : MonoBehaviour
         if (obj.targetEntity == null)
             return;
         if (!asyn)
-            DestroyObjectSync(obj);
+            DestroyEntitySync(obj);
         else
-            ProcessObjectAsyn(obj, false);
+            ProcessEntityAsyn(obj, false);
         obj.createFlag = SeparateEntity.CreateFlag.None;//被删除的物体标记为None
     }
 
@@ -323,7 +323,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// 同步方式创建物体
     /// </summary>
     /// <param name="obj"></param>
-    private void CreateObjectSync(SeparateEntity obj)
+    private void CreateEntitySync(SeparateEntity obj)
     {
         if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//如果标记为IsPrepareDestroy表示物体已经创建并正在等待删除，则直接设为None并返回
         {
@@ -337,7 +337,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// 同步方式销毁物体
     /// </summary>
     /// <param name="obj"></param>
-    private void DestroyObjectSync(SeparateEntity obj)
+    private void DestroyEntitySync(SeparateEntity obj)
     {
         if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//如果物体标记为IsPrepareCreate表示物体未创建并正在等待创建，则直接设为None并放回
         {
@@ -352,7 +352,7 @@ public class SceneObjectLoadController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="create"></param>
-    private void ProcessObjectAsyn(SeparateEntity obj, bool create)
+    private void ProcessEntityAsyn(SeparateEntity obj, bool create)
     {
         if (create)
         {
@@ -396,23 +396,23 @@ public class SceneObjectLoadController : MonoBehaviour
         mIsTaskRunning = true;
         while (mProcessTaskQueue.Count > 0)
         {
-            var obj = mProcessTaskQueue.Dequeue();
-            if (obj != null)
+            var entity = mProcessTaskQueue.Dequeue();
+            if (entity != null)
             {
-                if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//等待创建
+                if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//等待创建
                 {
-                    obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
-                    if (obj.OnShow())
+                    entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
+                    if (entity.OnShow())
                     {
                         if (mWaitForFrame == null)
                             mWaitForFrame = new WaitForEndOfFrame();
                         yield return mWaitForFrame;
                     }
                 }
-                else if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//等待销毁
+                else if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//等待销毁
                 {
-                    obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
-                    obj.OnHide();
+                    entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
+                    entity.OnHide();
                     if (mWaitForFrame == null)
                         mWaitForFrame = new WaitForEndOfFrame();
                     yield return mWaitForFrame;

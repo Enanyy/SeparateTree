@@ -28,12 +28,20 @@ public class SeparateTreeNode
         get { return mEntities; }
     }
 
+    /// <summary>
+    /// 子节点，可能为空
+    /// </summary>
+    public SeparateTreeNode[] children { get { return mChildren; } }
+
     private int mDepth;
 
     private Bounds mBounds;
 
     private LinkedList<IEntity> mEntities;
 
+    /// <summary>
+    /// 子节点个数
+    /// </summary>
     private int mChildCount = 0;
     protected SeparateTreeNode[] mChildren;
 
@@ -206,7 +214,7 @@ public class SeparateTreeNode
             Bounds bounds = new Bounds(center, size);
             if (bounds.IsBoundsContainsAnotherBounds(entity.bounds))
             {
-                SeparateTreeNode newNode = new SeparateTreeNode(bounds, depth + 1, mChildren.Length);
+                SeparateTreeNode newNode = new SeparateTreeNode(bounds, depth + 1, mChildCount);
                 node = newNode;
                 result = node;
             }

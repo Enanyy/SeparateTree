@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SceneObjectLoadController))]
-public class SceneObjectLoadControllerEditor : Editor {
+[CustomEditor(typeof(SeparateEntityController))]
+public class SeparateEntityControllerEditor : Editor {
 
-    private SceneObjectLoadController m_Target;
+    private SeparateEntityController m_Target;
 
     void OnEnable()
     {
-        m_Target = (SceneObjectLoadController) target;
+        m_Target = (SeparateEntityController) target;
     }
 
     public override void OnInspectorGUI()

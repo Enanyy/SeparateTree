@@ -76,19 +76,19 @@ public class Example : MonoBehaviour
 
     public SeparateDetector detector;
 
-    private SceneObjectLoadController mController;
+    private SeparateEntityController mController;
 
     void Start()
     {
-        mController = gameObject.GetComponent<SceneObjectLoadController>();
+        mController = gameObject.GetComponent<SeparateEntityController>();
         if (mController == null)
-            mController = gameObject.AddComponent<SceneObjectLoadController>();
+            mController = gameObject.AddComponent<SeparateEntityController>();
         mController.Init(bounds.center, bounds.size, asyn, SeparateTreeType.QuadTree);
 
 
         for (int i = 0; i < loadObjects.Count; i++)
         {
-            mController.AddSceneBlockObject(loadObjects[i]);
+            mController.AddSceneEntity(loadObjects[i]);
         }
     }
 
