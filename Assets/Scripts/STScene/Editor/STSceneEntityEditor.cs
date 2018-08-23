@@ -20,20 +20,20 @@ public class STSceneEntityEditor:Editor
             return;
         }
 
-        mTarget.localPosition = EditorGUILayout.Vector3Field("LocalPosition", mTarget.localPosition);
-        mTarget.localRotation = EditorGUILayout.Vector3Field("LocalRotation", mTarget.localRotation);
-        mTarget.localScale = EditorGUILayout.Vector3Field("LocalScale", mTarget.localScale);
+        mTarget.attribute.localPosition = EditorGUILayout.Vector3Field("LocalPosition", mTarget.attribute.localPosition);
+        mTarget.attribute.localRotation = EditorGUILayout.Vector3Field("LocalRotation", mTarget.attribute.localRotation);
+        mTarget.attribute.localScale = EditorGUILayout.Vector3Field("LocalScale", mTarget.attribute.localScale);
         if(mTarget.mGo)
         {
-            mTarget.mGo.transform.localPosition = mTarget.localPosition;
-            mTarget.mGo.transform.localRotation = Quaternion.Euler(mTarget.localRotation);
-            mTarget.mGo.transform.localScale = mTarget.localScale;
+            mTarget.mGo.transform.localPosition = mTarget.attribute.localPosition;
+            mTarget.mGo.transform.localRotation = Quaternion.Euler(mTarget.attribute.localRotation);
+            mTarget.mGo.transform.localScale = mTarget.attribute.localScale;
         }
 
-        mTarget.Size(EditorGUILayout.Vector3Field("Bounds Size", mTarget.bounds.size));
+        mTarget.attribute.bounds.size = EditorGUILayout.Vector3Field("Bounds Size", mTarget.attribute.bounds.size);
 
-        mTarget.path = EditorGUILayout.TextField("Resource Path", mTarget.path);
-        if (string.IsNullOrEmpty(mTarget.path) == false)
+        mTarget.attribute.path = EditorGUILayout.TextField("Resource Path", mTarget.attribute.path);
+        if (string.IsNullOrEmpty(mTarget.attribute.path) == false)
         {
             if (GUILayout.Button("Load"))
             {

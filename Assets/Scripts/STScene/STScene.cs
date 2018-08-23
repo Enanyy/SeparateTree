@@ -1,27 +1,59 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.Xml;
 
-
-public class STScene : MonoBehaviour
+public class STScene : MonoBehaviour,ISTAttribute
 {
-    public string desc;
+    #region
+    public class STSceneAttribute:STAttribute
+    {
+        public string name;
+        public Bounds bounds = new Bounds(Vector3.zero, new Vector3(200, 0, 200));
+        public bool asyn;
 
-    [SerializeField]
-    public List<STSceneEntity> entities;
+        public List<STSceneEntity> entities = new List<STSceneEntity>();
 
-    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(200,0,200));
+        public override XmlElement ToXml(XmlNode parent)
+        {
+            Dictionary<string, string> attributes = new Dictionary<string, string>();
+            attributes.Add("name", name);
+            attributes.Add("bounds", Helper.BoundsToString(bounds));
+            attributes.Add("asyn", asyn.ToString());
+
+            XmlElement node = CreateXmlNode(parent, typeof(STScene).ToString(), attributes);
+            for (int i = 0; i < entities.Count; ++i)
+            {
+                XmlElement child = entities[i].ToXml(node);
+            }
+
+            return node;
+        }
+    }
+
+    public STSceneAttribute attribute = new STSceneAttribute();
+    public void UpdateAttribute()
+    {
+       
+    }
+
+    public XmlElement ToXml(XmlNode parent)
+    {
+        UpdateAttribute();
+        return attribute.ToXml(parent);
+    }
+#endregion
 
     public Bounds bounds
     {
         get
         {
-            mBounds.center = transform.position;
-            return mBounds;
+            attribute.bounds.center = transform.position;
+            return attribute.bounds;
         }
     }
 
-    public bool asyn;
 
     public SeparateDetector detector;
 
@@ -29,7 +61,7 @@ public class STScene : MonoBehaviour
 
     public void Size(Vector3 size)
     {
-        mBounds.size = size;
+        attribute.bounds.size = size;
     }
 
     void Start()
@@ -37,9 +69,9 @@ public class STScene : MonoBehaviour
         mController = gameObject.GetComponent<SeparateEntityController>();
         if (mController == null)
             mController = gameObject.AddComponent<SeparateEntityController>();
-        mController.Init(bounds.center, bounds.size, asyn, SeparateTreeType.QuadTree);
+        mController.Init(bounds.center, bounds.size, attribute.asyn, SeparateTreeType.QuadTree);
 
-        entities.Clear();
+        attribute.entities.Clear();
         for(int i = 0; i < transform.childCount; ++i)
         {
             var entity = transform.GetChild(i).GetComponent<STSceneEntity>();
@@ -49,27 +81,22 @@ public class STScene : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < entities.Count; i++)
+        for (int i = 0; i < attribute.entities.Count; i++)
         {
-            mController.AddSceneEntity(entities[i]);
+            mController.AddSceneEntity(attribute.entities[i]);
         }
     }
 
     public void AddEntity(STSceneEntity entity)
     {
-        if (entities.Contains(entity) == false)
+        if (attribute.entities.Contains(entity) == false)
         {
-            entities.Add(entity);
+            attribute.entities.Add(entity);
         }
     }
 
 
-    void OnGUI()
-    {
-        GUI.color = Color.red;
-        GUILayout.Label(desc);
-    }
-    
+ 
     void Update()
     {
         mController.RefreshDetector(detector);

@@ -1,62 +1,88 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Xml;
+using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
-public class STSceneEntity:MonoBehaviour,IEntity
+public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
 {
-    [HideInInspector]
-    [SerializeField]
-    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(2,0,2));
-    [HideInInspector]
-    [SerializeField]
-    public string path = "Prefabs/";
+    #region Attribute
+    public class STSceneEntityAttribute : STAttribute
+    {
+        public string path = "Prefabs/";
+        public Vector3 position;
+        public Vector3 rotation;
+
+        public Bounds bounds = new Bounds(Vector3.zero, new Vector3(2, 0, 2));
+        public Vector3 localPosition;
+        public Vector3 localRotation;
+        public Vector3 localScale;
+
+        public override XmlElement ToXml(XmlNode parent)
+        {
+            Dictionary<string, string> attributes = new Dictionary<string, string>();
+            attributes.Add("position", position.ToString());
+            attributes.Add("rotation", rotation.ToString());
+            attributes.Add("bounds", Helper.BoundsToString(bounds));
+            attributes.Add("localPosition", localPosition.ToString());
+            attributes.Add("localRotation", localRotation.ToString());
+            attributes.Add("localScale", localScale.ToString());
+            attributes.Add("path", path);
+
+
+            return CreateXmlNode(parent,typeof(STSceneEntity).ToString(), attributes);
+        }
+    }
+
+    public STSceneEntityAttribute attribute = new STSceneEntityAttribute();
+    public void UpdateAttribute()
+    {
+        attribute.position = transform.position;
+        attribute.rotation = transform.rotation.eulerAngles;
+    }
+
+    public XmlElement ToXml(XmlNode parent)
+    {
+        UpdateAttribute();
+        return attribute.ToXml(parent);
+    }
+    #endregion
 
     [HideInInspector]
     public GameObject mGo;
 
-    [HideInInspector]
-    public Vector3 localPosition;
-    [HideInInspector]
-    public Vector3 localRotation;
-    [HideInInspector]
-    public Vector3 localScale = Vector3.one;
+   
 
     public Bounds bounds
     {
         get {
-            mBounds.center = transform.parent.TransformPoint(transform.localPosition);
-            return mBounds; }
-        set { mBounds = value; }
+            attribute.bounds.center = transform.parent.TransformPoint(transform.localPosition);
+            return attribute.bounds; }
     }
 
     public SeparateTreeNode node { get; set; }
-
-    public void Size(Vector3 size)
-    {
-        mBounds.size = size;
-    }
-
 
     public void OnHide()
     {
         if (mGo)
         {
-            Object.Destroy(mGo);
+            GameObject.Destroy(mGo);
             mGo = null;
         }
     }
 
     public bool OnShow()
     {
-        if (mGo == null && string.IsNullOrEmpty(path)==false)
+        if (mGo == null && string.IsNullOrEmpty(attribute.path)==false)
         {
-            var obj = Resources.Load<GameObject>(path);
+            var obj = Resources.Load<GameObject>(attribute.path);
             if (obj)
             {
                 mGo = Instantiate<GameObject>(obj);
                 mGo.transform.SetParent(transform);
-                mGo.transform.localPosition = localPosition;
-                mGo.transform.localRotation = Quaternion.Euler(localRotation);
-                mGo.transform.localScale = localScale;
+                mGo.transform.localPosition = attribute.localPosition;
+                mGo.transform.localRotation = Quaternion.Euler(attribute.localRotation);
+                mGo.transform.localScale = attribute.localScale;
                 return true;
             }
         }
@@ -73,6 +99,8 @@ public class STSceneEntity:MonoBehaviour,IEntity
             bounds.DrawBounds(Color.green);
         }
     }
+
+   
 #endif
 }
 
