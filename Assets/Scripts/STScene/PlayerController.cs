@@ -5,18 +5,25 @@ using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
-    public Camera camera;
+    public new Camera camera;
 
     private NavMeshAgent mAgent;
 
-    private Vector3 mDeltaPos;
-    
-	void Start ()
-	{
-	    mAgent = gameObject.GetComponent<NavMeshAgent>();
+
+
+    void Start()
+    {
+        mAgent = gameObject.GetComponent<NavMeshAgent>();
         mAgent.speed = 6;
-        mDeltaPos = camera.transform.position - transform.position;
-	}
+
+        if (camera)
+        {
+            SmoothFollow follow = camera.gameObject.AddComponent<SmoothFollow>();
+            follow.target = transform;
+            follow.height = 15;
+            follow.distance = 8;
+        }
+    }
 	
 	void Update () {
 	    if (Input.GetMouseButtonDown(0))
@@ -28,8 +35,5 @@ public class PlayerController : MonoBehaviour
 	            mAgent.SetDestination(hit.point);
 	        }
 	    }
-
-	    Vector3 campos = transform.position + mDeltaPos;
-	    camera.transform.position = Vector3.Lerp(camera.transform.position, campos, Time.deltaTime*10);
 	}
 }

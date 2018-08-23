@@ -20,12 +20,20 @@ public class STSceneEntityEditor:Editor
             return;
         }
 
+        mTarget.localPosition = EditorGUILayout.Vector3Field("LocalPosition", mTarget.localPosition);
+        mTarget.localRotation = EditorGUILayout.Vector3Field("LocalRotation", mTarget.localRotation);
+        mTarget.localScale = EditorGUILayout.Vector3Field("LocalScale", mTarget.localScale);
+        if(mTarget.mGo)
+        {
+            mTarget.mGo.transform.localPosition = mTarget.localPosition;
+            mTarget.mGo.transform.localRotation = Quaternion.Euler(mTarget.localRotation);
+            mTarget.mGo.transform.localScale = mTarget.localScale;
+        }
 
+        mTarget.Size(EditorGUILayout.Vector3Field("Bounds Size", mTarget.bounds.size));
 
-        mTarget.Size(EditorGUILayout.Vector3Field("Size", mTarget.bounds.size));
-
-        mTarget.mPath = EditorGUILayout.TextField("Path", mTarget.mPath);
-        if (string.IsNullOrEmpty(mTarget.mPath) == false)
+        mTarget.path = EditorGUILayout.TextField("Resource Path", mTarget.path);
+        if (string.IsNullOrEmpty(mTarget.path) == false)
         {
             if (GUILayout.Button("Load"))
             {

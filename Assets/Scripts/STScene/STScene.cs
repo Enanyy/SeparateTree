@@ -10,7 +10,7 @@ public class STScene : MonoBehaviour
     [SerializeField]
     public List<STSceneEntity> entities;
 
-    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(100,0,100));
+    private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(200,0,200));
 
     public Bounds bounds
     {

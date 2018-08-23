@@ -82,21 +82,27 @@ public class STSceneEditor : Editor
             go.transform.SetParent(mTarget.transform);
             go.transform.localPosition = new Vector3(x, 0, z);
             go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
 
             STSceneEntity entity = go.AddComponent<STSceneEntity>();
-            entity.Size(new Vector3(new System.Random(Guid.NewGuid().GetHashCode()).Next(2, 10), 0, new System.Random(Guid.NewGuid().GetHashCode()).Next(2, 10)));
+            int scale = new System.Random(Guid.NewGuid().GetHashCode()).Next(1, 4);
+            entity.Size(new Vector3(scale, 0, scale));
             string prefab = "Capsule";
+            float y = scale;
             if(i % 3 == 1)
             {
                 prefab = "Cube";
+                y = scale * 0.5f;
             }
             else if( i % 3 == 2)
             {
                 prefab = "Sphere";
+                y = scale * 0.5f;
             }
 
-            entity.mPath = "Prefabs/" + prefab;
-            go.transform.localScale = entity.bounds.size;
+            entity.path = "Prefabs/" + prefab;
+            entity.localScale = Vector3.one * scale;
+            entity.localPosition = new Vector3(0, y, 0);
 
            mTarget.AddEntity(entity);
         }

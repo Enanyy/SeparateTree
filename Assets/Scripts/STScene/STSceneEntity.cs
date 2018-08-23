@@ -8,10 +8,17 @@ public class STSceneEntity:MonoBehaviour,IEntity
     private Bounds mBounds = new Bounds(Vector3.zero, new Vector3(2,0,2));
     [HideInInspector]
     [SerializeField]
-    public string mPath = "Prefabs/";
+    public string path = "Prefabs/";
 
     [HideInInspector]
     public GameObject mGo;
+
+    [HideInInspector]
+    public Vector3 localPosition;
+    [HideInInspector]
+    public Vector3 localRotation;
+    [HideInInspector]
+    public Vector3 localScale = Vector3.one;
 
     public Bounds bounds
     {
@@ -40,15 +47,18 @@ public class STSceneEntity:MonoBehaviour,IEntity
 
     public bool OnShow()
     {
-        if (mGo == null && string.IsNullOrEmpty(mPath)==false)
+        if (mGo == null && string.IsNullOrEmpty(path)==false)
         {
-            var obj = Resources.Load<GameObject>(mPath);
-            mGo = Instantiate<GameObject>(obj);
-            mGo.transform.SetParent(transform);
-            mGo.transform.localPosition = Vector3.zero;
-            mGo.transform.localRotation = Quaternion.identity;
-            mGo.transform.localScale = Vector3.one;
-            return true;
+            var obj = Resources.Load<GameObject>(path);
+            if (obj)
+            {
+                mGo = Instantiate<GameObject>(obj);
+                mGo.transform.SetParent(transform);
+                mGo.transform.localPosition = localPosition;
+                mGo.transform.localRotation = Quaternion.Euler(localRotation);
+                mGo.transform.localScale = localScale;
+                return true;
+            }
         }
         return false;
     }
