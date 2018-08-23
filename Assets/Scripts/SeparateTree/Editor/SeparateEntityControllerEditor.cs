@@ -6,11 +6,11 @@ using UnityEditor;
 [CustomEditor(typeof(SeparateEntityController))]
 public class SeparateEntityControllerEditor : Editor {
 
-    private SeparateEntityController m_Target;
+    private SeparateEntityController mTarget;
 
     void OnEnable()
     {
-        m_Target = (SeparateEntityController) target;
+        mTarget = (SeparateEntityController) target;
     }
 
     public override void OnInspectorGUI()
@@ -18,23 +18,23 @@ public class SeparateEntityControllerEditor : Editor {
         base.OnInspectorGUI();
 #if UNITY_EDITOR
         GUILayout.Label("调试：");
-        bool drawTree = GUILayout.Toggle(m_Target.debug_DrawMinDepth >= 0 && m_Target.debug_DrawMaxDepth >= 0, "显示四叉树包围盒");
+        bool drawTree = GUILayout.Toggle(mTarget.debug_DrawMinDepth >= 0 && mTarget.debug_DrawMaxDepth >= 0, "显示四叉树包围盒");
         if (drawTree == false)
         {
-            m_Target.debug_DrawMaxDepth = -1;
-            m_Target.debug_DrawMinDepth = -1;
+            mTarget.debug_DrawMaxDepth = -1;
+            mTarget.debug_DrawMinDepth = -1;
         }
         else
         {
-            m_Target.debug_DrawMaxDepth = m_Target.debug_DrawMaxDepth < 0 ? 0 : m_Target.debug_DrawMaxDepth;
-            m_Target.debug_DrawMinDepth = m_Target.debug_DrawMinDepth < 0 ? 0 : m_Target.debug_DrawMinDepth;
+            mTarget.debug_DrawMaxDepth = mTarget.debug_DrawMaxDepth < 0 ? 0 : mTarget.debug_DrawMaxDepth;
+            mTarget.debug_DrawMinDepth = mTarget.debug_DrawMinDepth < 0 ? 0 : mTarget.debug_DrawMinDepth;
         }
-        m_Target.debug_DrawObj = GUILayout.Toggle(m_Target.debug_DrawObj, "显示场景对象包围盒");
+        mTarget.debug_DrawEntity = GUILayout.Toggle(mTarget.debug_DrawEntity, "显示场景对象包围盒");
         if (drawTree)
         {
             GUILayout.Label("显示四叉树深度范围：");
-            m_Target.debug_DrawMinDepth = Mathf.Max(0, EditorGUILayout.IntField("最小深度", m_Target.debug_DrawMinDepth));
-            m_Target.debug_DrawMaxDepth = Mathf.Max(0, EditorGUILayout.IntField("最大深度", m_Target.debug_DrawMaxDepth));
+            mTarget.debug_DrawMinDepth = Mathf.Max(0, EditorGUILayout.IntField("最小深度", mTarget.debug_DrawMinDepth));
+            mTarget.debug_DrawMaxDepth = Mathf.Max(0, EditorGUILayout.IntField("最大深度", mTarget.debug_DrawMaxDepth));
         }
 #endif
     }

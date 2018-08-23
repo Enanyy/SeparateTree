@@ -71,7 +71,7 @@ public class SeparateEntityController : MonoBehaviour
             return;
         mSeparateTree = new SeparateTree(treeType, center, size, quadTreeDepth);
         mLoadedEntityList = new List<SeparateEntity>();
-        mPreDestroyQueue = new PriorityQueue<SeparateEntity>(new SceneObjectWeightComparer());
+        mPreDestroyQueue = new PriorityQueue<SeparateEntity>(new SeparateEntityWeightComparer());
 
         mMaxCreateCount = Mathf.Max(0, maxCreateCount);
         mMinCreateCount = Mathf.Clamp(minCreateCount, 0, mMaxCreateCount);
@@ -422,7 +422,7 @@ public class SeparateEntityController : MonoBehaviour
         mIsTaskRunning = false;
     }
 
-    private class SceneObjectWeightComparer : IComparer<SeparateEntity>
+    private class SeparateEntityWeightComparer : IComparer<SeparateEntity>
     {
 
         public int Compare(SeparateEntity x, SeparateEntity y)
@@ -438,7 +438,7 @@ public class SeparateEntityController : MonoBehaviour
 #if UNITY_EDITOR
     public int debug_DrawMinDepth = 0;
     public int debug_DrawMaxDepth = 5;
-    public bool debug_DrawObj = true;
+    public bool debug_DrawEntity = true;
     void OnDrawGizmosSelected()
     {
         Color mindcolor = new Color32(0, 66, 255, 255);
@@ -446,7 +446,7 @@ public class SeparateEntityController : MonoBehaviour
         Color objcolor = new Color32(0, 210, 255, 255);
         Color hitcolor = new Color32(255, 216, 0, 255);
         if (mSeparateTree != null)
-            mSeparateTree.DrawTree(mindcolor, maxdcolor, objcolor, hitcolor, debug_DrawMinDepth, debug_DrawMaxDepth, debug_DrawObj);
+            mSeparateTree.DrawTree(mindcolor, maxdcolor, objcolor, hitcolor, debug_DrawMinDepth, debug_DrawMaxDepth, debug_DrawEntity);
     }
 #endif
 }

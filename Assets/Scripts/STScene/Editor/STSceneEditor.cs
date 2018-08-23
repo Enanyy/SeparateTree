@@ -39,9 +39,9 @@ public class STSceneEditor : Editor
 
         if (mTarget.transform.childCount == 0)
         {
-            if (GUILayout.Button("Test Entity"))
+            if (GUILayout.Button("Auto Create Entity"))
             {
-                TestSceneEntity();
+                AutoCreateSceneEntity();
             }
         }
 
@@ -69,7 +69,7 @@ public class STSceneEditor : Editor
         mTarget.AddEntity(entity);
     }
 
-    private void TestSceneEntity()
+    private void AutoCreateSceneEntity()
     {
         Vector3 size = mTarget.bounds.size * 0.5f;
         for(int i = 0; i < 200; i++)
