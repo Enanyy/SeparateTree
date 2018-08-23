@@ -268,12 +268,12 @@ public class SeparateEntityController : MonoBehaviour
         {
 
             //var obj = m_PreDestroyObjectQueue.Dequeue();
-            var obj = mPreDestroyQueue.Pop();
-            if (obj == null)
+            var entity = mPreDestroyQueue.Pop();
+            if (entity == null)
                 continue;
-            if (obj.createFlag == SeparateEntity.CreateFlag.OutofBounds)
+            if (entity.createFlag == SeparateEntity.CreateFlag.OutofBounds)
             {
-                DestroyEntity(obj, mIsAsyn);
+                DestroyEntity(entity, mIsAsyn);
             }
         }
     }
@@ -304,47 +304,47 @@ public class SeparateEntityController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="asyn"></param>
-    private void DestroyEntity(SeparateEntity obj, bool asyn)
+    private void DestroyEntity(SeparateEntity entity, bool asyn)
     {
-        if (obj == null)
+        if (entity == null)
             return;
-        if (obj.createFlag == SeparateEntity.CreateFlag.None)
+        if (entity.createFlag == SeparateEntity.CreateFlag.None)
             return;
-        if (obj.targetEntity == null)
+        if (entity.targetEntity == null)
             return;
         if (!asyn)
-            DestroyEntitySync(obj);
+            DestroyEntitySync(entity);
         else
-            ProcessEntityAsyn(obj, false);
-        obj.createFlag = SeparateEntity.CreateFlag.None;//被删除的物体标记为None
+            ProcessEntityAsyn(entity, false);
+        entity.createFlag = SeparateEntity.CreateFlag.None;//被删除的物体标记为None
     }
 
     /// <summary>
     /// 同步方式创建物体
     /// </summary>
     /// <param name="obj"></param>
-    private void CreateEntitySync(SeparateEntity obj)
+    private void CreateEntitySync(SeparateEntity entity)
     {
-        if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//如果标记为IsPrepareDestroy表示物体已经创建并正在等待删除，则直接设为None并返回
+        if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//如果标记为IsPrepareDestroy表示物体已经创建并正在等待删除，则直接设为None并返回
         {
-            obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
+            entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
             return;
         }
-        obj.OnShow();//执行OnShow
+        entity.OnShow();//执行OnShow
     }
 
     /// <summary>
     /// 同步方式销毁物体
     /// </summary>
     /// <param name="obj"></param>
-    private void DestroyEntitySync(SeparateEntity obj)
+    private void DestroyEntitySync(SeparateEntity entity)
     {
-        if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//如果物体标记为IsPrepareCreate表示物体未创建并正在等待创建，则直接设为None并放回
+        if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//如果物体标记为IsPrepareCreate表示物体未创建并正在等待创建，则直接设为None并放回
         {
-            obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
+            entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
             return;
         }
-        obj.OnHide();//执行OnHide
+        entity.OnHide();//执行OnHide
     }
 
     /// <summary>
@@ -352,33 +352,33 @@ public class SeparateEntityController : MonoBehaviour
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="create"></param>
-    private void ProcessEntityAsyn(SeparateEntity obj, bool create)
+    private void ProcessEntityAsyn(SeparateEntity entity, bool create)
     {
         if (create)
         {
-            if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//表示物体已经创建并等待销毁，则设置为None并跳过
+            if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//表示物体已经创建并等待销毁，则设置为None并跳过
             {
-                obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
+                entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
                 return;
             }
-            if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//已经开始等待创建，则跳过
+            if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//已经开始等待创建，则跳过
                 return;
-            obj.processFlag = SeparateEntity.CreatingProcessFlag.IsPrepareCreate;//设置为等待开始创建
+            entity.processFlag = SeparateEntity.CreatingProcessFlag.IsPrepareCreate;//设置为等待开始创建
         }
         else
         {
-            if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//表示物体未创建并等待创建，则设置为None并跳过
+            if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareCreate)//表示物体未创建并等待创建，则设置为None并跳过
             {
-                obj.processFlag = SeparateEntity.CreatingProcessFlag.None;
+                entity.processFlag = SeparateEntity.CreatingProcessFlag.None;
                 return;
             }
-            if (obj.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//已经开始等待销毁，则跳过
+            if (entity.processFlag == SeparateEntity.CreatingProcessFlag.IsPrepareDestroy)//已经开始等待销毁，则跳过
                 return;
-            obj.processFlag = SeparateEntity.CreatingProcessFlag.IsPrepareDestroy;//设置为等待开始销毁
+            entity.processFlag = SeparateEntity.CreatingProcessFlag.IsPrepareDestroy;//设置为等待开始销毁
         }
         if (mProcessTaskQueue == null)
             mProcessTaskQueue = new Queue<SeparateEntity>();
-        mProcessTaskQueue.Enqueue(obj);//加入
+        mProcessTaskQueue.Enqueue(entity);//加入
         if (!mIsTaskRunning)
         {
             StartCoroutine(AsynTaskProcess());//开始协程执行异步任务
