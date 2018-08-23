@@ -61,7 +61,7 @@ public class TransformExDetector : SeparateDetector
     void OnDrawGizmos()
     {
         Bounds b = new Bounds(transform.position + mPosOffset, detectorSize + mSizeEx);
-        b.DrawBounds(Color.yellow);
+        b.DrawEx(Color.yellow);
     }
 #endif
 }

@@ -8,7 +8,7 @@ public static class BoundsEx
     /// </summary>
     /// <param name="bounds"></param>
     /// <param name="color"></param>
-    public static void DrawBounds(this Bounds bounds, Color color)
+    public static void DrawEx(this Bounds bounds, Color color)
     {
         Gizmos.color = color;
 
@@ -161,4 +161,11 @@ public static class BoundsEx
             return false;
         return true;
     }
+
+
+    public static string ToStringEx(this Bounds bounds)
+    {
+        return string.Format("({0},{1},{2},{3},{4},{5})", bounds.center.x, bounds.center.y, bounds.center.z, bounds.size.x, bounds.size.y, bounds.size.z);
+    }
+
 }

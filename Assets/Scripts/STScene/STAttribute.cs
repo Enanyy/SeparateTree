@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+
 using System.Security;
-using System.Text;
+#if UNITY_EDITOR
 using System.Xml;
+#endif
 using UnityEngine;
 
 public abstract class STAttribute

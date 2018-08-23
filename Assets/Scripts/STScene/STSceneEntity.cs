@@ -131,7 +131,7 @@ public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
         }
         else
         {
-            bounds.DrawBounds(Color.green);
+            bounds.DrawEx(Color.green);
         }
     }
 

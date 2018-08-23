@@ -244,7 +244,7 @@ public class SeparateTreeNode
             float d = ((float)mDepth) / maxDepth;
             Color color = Color.Lerp(treeMinDepthColor, treeMaxDepthColor, d);
 
-            mBounds.DrawBounds(color);
+            mBounds.DrawEx(color);
         }
         if (drawEntity)
         {
@@ -254,7 +254,7 @@ public class SeparateTreeNode
                 var entity = node.Value ;
                 if (entity != null)
                 {
-                    entity.bounds.DrawBounds(objColor);
+                    entity.bounds.DrawEx(objColor);
                 }
                 node = node.Next;
             }  

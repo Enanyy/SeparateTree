@@ -101,10 +101,10 @@ public class SeparateEntity : IEntity
     {
         if (createFlag == CreateFlag.New || createFlag == CreateFlag.Old)
         {
-            mTargetEntity.bounds.DrawBounds(hitColor);
+            mTargetEntity.bounds.DrawEx(hitColor);
         }
         else 
-        mTargetEntity.bounds.DrawBounds(color);
+        mTargetEntity.bounds.DrawEx(color);
     }
 #endif
 }

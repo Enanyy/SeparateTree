@@ -181,7 +181,7 @@ public class STScene : MonoBehaviour,ISTAttribute
         }
         else
         {
-            bounds.DrawBounds(Color.green);
+            bounds.DrawEx(Color.green);
         }
     }
 }

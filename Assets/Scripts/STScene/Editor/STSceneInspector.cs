@@ -47,20 +47,25 @@ public class STSceneInspector : Editor
             {
                 AutoCreateSceneEntity();
             }
+
+            if (GUILayout.Button("Load Xml"))
+            {
+                LoadXml();
+            }
         }
 
-        if(mTarget.transform.childCount > 0)
+        if (mTarget.transform.childCount > 0)
         {
             if (GUILayout.Button("Clear Entity"))
             {
                 ClearEntity();
             }
+            if (GUILayout.Button("Save Xml"))
+            {
+                SaveXml();
+            }
         }
-
-        if (GUILayout.Button("Save Xml"))
-        {
-            SaveXml();
-        }
+       
     }
 
 
@@ -143,7 +148,7 @@ public class STSceneInspector : Editor
         byte[] bytes = ms.ToArray();
         string xml = System.Text.Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3);
 
-        string path = EditorUtility.SaveFilePanel("导出场景配置文件", Application.dataPath, "STScene" , "txt");
+        string path = EditorUtility.SaveFilePanel("导出场景配置文件", Application.dataPath + "/Resources/Congfigs/Scene/", "STScene" , "txt");
         EditorUtility.DisplayProgressBar("请稍候", "正在导出场景配置文件", 0.1f);
         if (!string.IsNullOrEmpty(path))
         {
@@ -155,4 +160,40 @@ public class STSceneInspector : Editor
         EditorUtility.ClearProgressBar();
     }
 
+    [MenuItem("STScene/Open")]
+    static void LoadXml()
+    {
+        string path = EditorUtility.OpenFilePanel("Select a scene config", Application.dataPath+"/Resources/Congfigs/Scene/", "txt");
+
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+
+        Debug.Log(path);
+
+
+        string text = File.ReadAllText(path);
+
+
+        var scene = GameObject.FindObjectOfType<STScene>();
+        if (scene == null)
+        {
+            GameObject go = new GameObject(typeof(STScene).ToString());
+            scene = go.AddComponent<STScene>();
+            go.transform.position = Vector3.zero;
+            go.transform.rotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+        }
+
+        for (int i = scene.transform.childCount - 1; i >= 0; --i)
+        {
+            GameObject.DestroyImmediate(scene.transform.GetChild(i).gameObject);
+        }
+        scene.attribute.entities.Clear();
+
+        scene.LoadXml(text);
+
+
+    }
 }
