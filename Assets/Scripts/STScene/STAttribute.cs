@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security;
 using System.Text;
 using System.Xml;
 using UnityEngine;
 
 public abstract class STAttribute
 {
+#if UNITY_EDITOR
     public static XmlElement CreateXmlNode(XmlNode parent, string tag, Dictionary<string, string> attributes)
     {
         XmlDocument doc;
@@ -34,10 +36,15 @@ public abstract class STAttribute
     }
 
     public abstract XmlElement ToXml(XmlNode parent);
+#endif
 }
 
 public interface ISTAttribute
 {
     void UpdateAttribute();
+    void SetAttribute();
+#if UNITY_EDITOR
     XmlElement ToXml(XmlNode parent);
+#endif
+    void ParseXml(SecurityElement node);
 }

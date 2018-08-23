@@ -2,11 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+#if UNITY_EDITOR
 using System.Xml;
+#endif
+using System.Security;
+using Mono.Xml;
 
 public class STScene : MonoBehaviour,ISTAttribute
 {
     #region
+    [System.Serializable]
     public class STSceneAttribute:STAttribute
     {
         public string name;
@@ -14,12 +19,12 @@ public class STScene : MonoBehaviour,ISTAttribute
         public bool asyn;
 
         public List<STSceneEntity> entities = new List<STSceneEntity>();
-
+#if UNITY_EDITOR
         public override XmlElement ToXml(XmlNode parent)
         {
             Dictionary<string, string> attributes = new Dictionary<string, string>();
             attributes.Add("name", name);
-            attributes.Add("bounds", Helper.BoundsToString(bounds));
+            attributes.Add("bounds", bounds.ToStringEx());
             attributes.Add("asyn", asyn.ToString());
 
             XmlElement node = CreateXmlNode(parent, typeof(STScene).ToString(), attributes);
@@ -30,20 +35,90 @@ public class STScene : MonoBehaviour,ISTAttribute
 
             return node;
         }
+#endif
     }
-
+    [SerializeField][HideInInspector]
     public STSceneAttribute attribute = new STSceneAttribute();
+
     public void UpdateAttribute()
     {
        
     }
-
+#if UNITY_EDITOR
     public XmlElement ToXml(XmlNode parent)
     {
         UpdateAttribute();
         return attribute.ToXml(parent);
     }
-#endregion
+
+#endif
+    public void SetAttribute()
+    {
+
+    }
+    public void ParseXml(SecurityElement node)
+    {
+        if(node == null)
+        {
+            return;
+        }
+
+       
+        if(node.Tag == typeof(STScene).ToString())
+        {
+            attribute.name = node.Attribute("name");
+            attribute.asyn = node.Attribute("asyn").ToBoolEx();
+            attribute.bounds = node.Attribute("bounds").ToBoundsEx();
+
+            if (node.Children != null)
+            {
+                string entityName = typeof(STSceneEntity).ToString();
+                for (int i = 0; i < node.Children.Count; ++i)
+                {
+                    SecurityElement child = node.Children[i] as SecurityElement;
+                    if (child.Tag == entityName)
+                    {
+                        GameObject go = new GameObject("entity-" + (attribute.entities.Count + 1));
+
+                        go.transform.SetParent(transform);
+                        go.transform.localPosition = Vector3.zero;
+                        go.transform.localRotation = Quaternion.identity;
+                        go.transform.localScale = Vector3.one;
+
+                        STSceneEntity entity = go.AddComponent<STSceneEntity>();
+
+                        attribute.entities.Add(entity);
+
+                        entity.ParseXml(child);
+
+                    }
+                }
+            }
+        }
+
+        SetAttribute();
+
+       
+    }
+
+    public void LoadXml(string text)
+    {
+        if(string.IsNullOrEmpty(text))
+        {
+            return;
+
+        }
+
+        SecurityParser sp = new SecurityParser();
+
+        sp.LoadXml(text);
+
+
+        SecurityElement se = sp.ToXml();
+
+        ParseXml(se);
+    }
+    #endregion
 
     public Bounds bounds
     {
@@ -59,10 +134,7 @@ public class STScene : MonoBehaviour,ISTAttribute
 
     private SeparateEntityController mController;
 
-    public void Size(Vector3 size)
-    {
-        attribute.bounds.size = size;
-    }
+   
 
     void Start()
     {

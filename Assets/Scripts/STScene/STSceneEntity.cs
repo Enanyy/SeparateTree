@@ -1,12 +1,16 @@
 ﻿using System;
+#if UNITY_EDITOR
 using System.Xml;
+#endif
 using System.Collections.Generic;
 using UnityEngine;
+using System.Security;
 
 [System.Serializable]
 public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
 {
     #region Attribute
+    [System.Serializable]
     public class STSceneEntityAttribute : STAttribute
     {
         public string path = "Prefabs/";
@@ -17,13 +21,13 @@ public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
         public Vector3 localPosition;
         public Vector3 localRotation;
         public Vector3 localScale;
-
+#if UNITY_EDITOR
         public override XmlElement ToXml(XmlNode parent)
         {
             Dictionary<string, string> attributes = new Dictionary<string, string>();
             attributes.Add("position", position.ToString());
             attributes.Add("rotation", rotation.ToString());
-            attributes.Add("bounds", Helper.BoundsToString(bounds));
+            attributes.Add("bounds", bounds.ToStringEx());
             attributes.Add("localPosition", localPosition.ToString());
             attributes.Add("localRotation", localRotation.ToString());
             attributes.Add("localScale", localScale.ToString());
@@ -32,20 +36,51 @@ public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
 
             return CreateXmlNode(parent,typeof(STSceneEntity).ToString(), attributes);
         }
+#endif
     }
-
+    [SerializeField][HideInInspector]
     public STSceneEntityAttribute attribute = new STSceneEntityAttribute();
     public void UpdateAttribute()
     {
         attribute.position = transform.position;
         attribute.rotation = transform.rotation.eulerAngles;
     }
-
+   
+#if UNITY_EDITOR
     public XmlElement ToXml(XmlNode parent)
     {
         UpdateAttribute();
         return attribute.ToXml(parent);
     }
+#endif
+
+    public void SetAttribute()
+    {
+        transform.position = attribute.position;
+        transform.rotation = Quaternion.Euler(attribute.rotation);
+    }
+
+    public void ParseXml(SecurityElement node)
+    {
+        if(node == null)
+        {
+            return;
+        }
+
+        if(node.Tag == typeof(STSceneEntity).ToString())
+        {
+            attribute.position = node.Attribute("position").ToVector3Ex();
+            attribute.rotation = node.Attribute("rotation").ToVector3Ex();
+            attribute.localPosition = node.Attribute("localPosition").ToVector3Ex();
+            attribute.localRotation = node.Attribute("localRotation").ToVector3Ex();
+            attribute.localScale = node.Attribute("localScale").ToVector3Ex();
+            attribute.bounds = node.Attribute("bounds").ToBoundsEx();
+            attribute.path = node.Attribute("path");
+        }
+
+        SetAttribute();
+    }
+
     #endregion
 
     [HideInInspector]

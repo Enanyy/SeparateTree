@@ -3,7 +3,7 @@ using UnityEditor;
 
 
 [CustomEditor(typeof(STSceneEntity))]
-public class STSceneEntityEditor:Editor
+public class STSceneEntityInspector : Editor
 {
     private STSceneEntity mTarget;
 
