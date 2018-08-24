@@ -88,7 +88,7 @@ public class STSceneInspector : Editor
     private void AutoCreateSceneEntity()
     {
         Vector3 size = mTarget.bounds.size * 0.5f;
-        for(int i = 0; i < 200; i++)
+        for(int i = 0; i < 300; i++)
         {
             float x = new System.Random(Guid.NewGuid().GetHashCode()).Next(-(int)size.x, (int)size.x);
             float z = new System.Random(Guid.NewGuid().GetHashCode()).Next(-(int)size.z, (int)size.z);
