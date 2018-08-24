@@ -212,14 +212,14 @@ public class SeparateTreeNode
         if (node == null)
         {
             Bounds bounds = new Bounds(center, size);
-            if (bounds.IsBoundsContainsAnotherBounds(entity.bounds))
+            if (bounds.ContainsEx(entity.bounds))
             {
                 SeparateTreeNode newNode = new SeparateTreeNode(bounds, depth + 1, mChildCount);
                 node = newNode;
                 result = node;
             }
         }
-        else if (node.bounds.IsBoundsContainsAnotherBounds(entity.bounds))
+        else if (node.bounds.ContainsEx(entity.bounds))
         {
             result = node;
         }

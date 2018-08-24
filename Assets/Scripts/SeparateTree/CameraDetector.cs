@@ -17,7 +17,7 @@ public class CameraDetector : SeparateDetector
     {
         if (mCamera == null)
             return false;
-        return bounds.IsBoundsInCamera(mCamera);
+        return bounds.IsBoundsInCameraEx(mCamera);
     }
 
 #if UNITY_EDITOR

@@ -21,7 +21,7 @@ public static class BoundsEx
     /// <param name="bounds"></param>
     /// <param name="camera"></param>
     /// <returns></returns>
-    public static bool IsBoundsInCamera(this Bounds bounds, Camera camera)
+    public static bool IsBoundsInCameraEx(this Bounds bounds, Camera camera)
     {
 
         Matrix4x4 matrix = camera.projectionMatrix*camera.worldToCameraMatrix;
@@ -141,7 +141,7 @@ public static class BoundsEx
     /// <param name="bounds"></param>
     /// <param name="compareTo"></param>
     /// <returns></returns>
-    public static bool IsBoundsContainsAnotherBounds(this Bounds bounds, Bounds compareTo)
+    public static bool ContainsEx(this Bounds bounds, Bounds compareTo)
     {
         if (!bounds.Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, compareTo.size.y / 2, -compareTo.size.z / 2)))
             return false;
