@@ -27,11 +27,11 @@ public class STSceneInspector : Editor
         mTarget.attribute.asyn = EditorGUILayout.Toggle("asyn", mTarget.attribute.asyn);
         if (GUILayout.Button("Add Ground"))
         {
-            AddSTComponent(typeof(STSceneGround));
+            AddSTComponent<STSceneGround>();
         }
         if (GUILayout.Button("Add Entity"))
         {
-            AddSTComponent(typeof(STSceneEntity));
+            AddSTComponent<STSceneEntity>();
         }
 
 
@@ -71,16 +71,16 @@ public class STSceneInspector : Editor
     }
 
 
-    private void AddSTComponent(Type type)
+    private void AddSTComponent<T>() where T:STComponent
     {
-        GameObject go = new GameObject(type.ToString());
+        GameObject go = new GameObject(typeof(T).ToString());
 
         go.transform.SetParent(mTarget.transform);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
         go.transform.localScale = Vector3.one;
 
-        STComponent component = go.AddComponent(type) as STComponent;
+        STComponent component = go.AddComponent<T>() as STComponent;
 
         mTarget.AddSTComponent(component);
     }
