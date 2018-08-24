@@ -8,17 +8,22 @@ using System.Xml;
 using System.Security;
 using Mono.Xml;
 
-public class STScene : MonoBehaviour,ISTAttribute
+public class STScene : STComponent
 {
     #region
-    [System.Serializable]
+    [Serializable]
     public class STSceneAttribute:STAttribute
     {
+        [HideInInspector]
         public string name;
+        [HideInInspector]
         public Bounds bounds = new Bounds(Vector3.zero, new Vector3(200, 0, 200));
+        [HideInInspector]
         public bool asyn;
 
-        public List<STSceneEntity> entities = new List<STSceneEntity>();
+        public List<STComponent> components = new List<STComponent>();
+
+        
 #if UNITY_EDITOR
         public override XmlElement ToXml(XmlNode parent)
         {
@@ -28,35 +33,35 @@ public class STScene : MonoBehaviour,ISTAttribute
             attributes.Add("asyn", asyn.ToString());
 
             XmlElement node = CreateXmlNode(parent, typeof(STScene).ToString(), attributes);
-            for (int i = 0; i < entities.Count; ++i)
+            for (int i = 0; i < components.Count; ++i)
             {
-                XmlElement child = entities[i].ToXml(node);
+                XmlElement child = components[i].ToXml(node);
             }
 
             return node;
         }
 #endif
     }
-    [SerializeField][HideInInspector]
+    [SerializeField]
     public STSceneAttribute attribute = new STSceneAttribute();
 
-    public void UpdateAttribute()
+    public override void UpdateAttribute()
     {
        
     }
 #if UNITY_EDITOR
-    public XmlElement ToXml(XmlNode parent)
+    public override XmlElement ToXml(XmlNode parent)
     {
         UpdateAttribute();
         return attribute.ToXml(parent);
     }
 
 #endif
-    public void SetAttribute()
+    public override void SetAttribute()
     {
 
     }
-    public void ParseXml(SecurityElement node)
+    public override void ParseXml(SecurityElement node)
     {
         if(node == null)
         {
@@ -72,26 +77,34 @@ public class STScene : MonoBehaviour,ISTAttribute
 
             if (node.Children != null)
             {
-                string entityName = typeof(STSceneEntity).ToString();
+
                 for (int i = 0; i < node.Children.Count; ++i)
                 {
                     SecurityElement child = node.Children[i] as SecurityElement;
-                    if (child.Tag == entityName)
+
+                    GameObject go = new GameObject(child.Tag);
+
+                    go.transform.SetParent(transform);
+                    go.transform.localPosition = Vector3.zero;
+                    go.transform.localRotation = Quaternion.identity;
+                    go.transform.localScale = Vector3.one;
+
+                    Type component = Type.GetType(child.Tag);
+                    if(component == null)
                     {
-                        GameObject go = new GameObject("entity-" + (attribute.entities.Count + 1));
-
-                        go.transform.SetParent(transform);
-                        go.transform.localPosition = Vector3.zero;
-                        go.transform.localRotation = Quaternion.identity;
-                        go.transform.localScale = Vector3.one;
-
-                        STSceneEntity entity = go.AddComponent<STSceneEntity>();
-
-                        attribute.entities.Add(entity);
-
-                        entity.ParseXml(child);
-
+                        DestroyImmediate(go);continue;
                     }
+                    STComponent entity = go.AddComponent(component) as STComponent;
+
+                    if(entity == null)
+                    {
+                        DestroyImmediate(go);continue;
+                    }
+
+                    attribute.components.Add(entity);
+
+                    entity.ParseXml(child);
+
                 }
             }
         }
@@ -143,27 +156,28 @@ public class STScene : MonoBehaviour,ISTAttribute
             mController = gameObject.AddComponent<SeparateEntityController>();
         mController.Init(bounds.center, bounds.size, attribute.asyn, SeparateTreeType.QuadTree);
 
-        attribute.entities.Clear();
-        for(int i = 0; i < transform.childCount; ++i)
+        List<STSceneEntity> entities = new List<STSceneEntity>();
+        for (int i = 0; i < transform.childCount; ++i)
         {
             var entity = transform.GetChild(i).GetComponent<STSceneEntity>();
-            if(entity)
+            if (entity)
             {
-                AddEntity(entity);
+                entities.Add(entity);
             }
         }
 
-        for (int i = 0; i < attribute.entities.Count; i++)
+
+        for (int i = 0; i < entities.Count; i++)
         {
-            mController.AddSceneEntity(attribute.entities[i]);
+            mController.AddSceneEntity(entities[i]);
         }
     }
 
-    public void AddEntity(STSceneEntity entity)
+    public void AddSTComponent(STComponent component)
     {
-        if (attribute.entities.Contains(entity) == false)
+        if (attribute.components.Contains(component) == false)
         {
-            attribute.entities.Add(entity);
+            attribute.components.Add(component);
         }
     }
 

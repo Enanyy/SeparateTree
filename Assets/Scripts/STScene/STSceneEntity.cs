@@ -7,7 +7,7 @@ using UnityEngine;
 using System.Security;
 
 [System.Serializable]
-public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
+public class STSceneEntity: STComponent,IEntity
 {
     #region Attribute
     [System.Serializable]
@@ -40,27 +40,27 @@ public class STSceneEntity:MonoBehaviour,IEntity,ISTAttribute
     }
     [SerializeField][HideInInspector]
     public STSceneEntityAttribute attribute = new STSceneEntityAttribute();
-    public void UpdateAttribute()
+    public override void UpdateAttribute()
     {
         attribute.position = transform.position;
         attribute.rotation = transform.rotation.eulerAngles;
     }
    
 #if UNITY_EDITOR
-    public XmlElement ToXml(XmlNode parent)
+    public override XmlElement ToXml(XmlNode parent)
     {
         UpdateAttribute();
         return attribute.ToXml(parent);
     }
 #endif
 
-    public void SetAttribute()
+    public override void SetAttribute()
     {
         transform.position = attribute.position;
         transform.rotation = Quaternion.Euler(attribute.rotation);
     }
 
-    public void ParseXml(SecurityElement node)
+    public override void ParseXml(SecurityElement node)
     {
         if(node == null)
         {

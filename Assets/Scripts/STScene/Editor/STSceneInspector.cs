@@ -17,27 +17,29 @@ public class STSceneInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        mTarget.attribute.name = EditorGUILayout.TextField("Name", mTarget.attribute.name);
-        mTarget.attribute.bounds.size = EditorGUILayout.Vector3Field("Size", mTarget.attribute.bounds.size);
-        mTarget.attribute.asyn = EditorGUILayout.Toggle("asyn", mTarget.attribute.asyn);
-
         base.OnInspectorGUI();
-
-        if(mTarget == null)
+        if (mTarget == null)
         {
             return;
         }
-
+        mTarget.attribute.name = EditorGUILayout.TextField("Name", mTarget.attribute.name);
+        mTarget.attribute.bounds.size = EditorGUILayout.Vector3Field("Size", mTarget.attribute.bounds.size);
+        mTarget.attribute.asyn = EditorGUILayout.Toggle("asyn", mTarget.attribute.asyn);
+        if (GUILayout.Button("Add Ground"))
+        {
+            AddSTComponent(typeof(STSceneGround));
+        }
         if (GUILayout.Button("Add Entity"))
         {
-            AddSceneEntity();
+            AddSTComponent(typeof(STSceneEntity));
         }
 
-        for(int i = mTarget.attribute.entities.Count - 1; i  >=0; i --)
+
+        for(int i = mTarget.attribute.components.Count - 1; i  >=0; i --)
         {
-            if(mTarget.attribute.entities[i] == null)
+            if(mTarget.attribute.components[i] == null)
             {
-                mTarget.attribute.entities.RemoveAt(i);
+                mTarget.attribute.components.RemoveAt(i);
             }
         }
 
@@ -56,7 +58,7 @@ public class STSceneInspector : Editor
 
         if (mTarget.transform.childCount > 0)
         {
-            if (GUILayout.Button("Clear Entity"))
+            if (GUILayout.Button("Clear"))
             {
                 ClearEntity();
             }
@@ -69,18 +71,18 @@ public class STSceneInspector : Editor
     }
 
 
-    private void AddSceneEntity()
+    private void AddSTComponent(Type type)
     {
-        GameObject go = new GameObject("entity-" + (mTarget.attribute.entities.Count+1));
+        GameObject go = new GameObject(type.ToString());
 
         go.transform.SetParent(mTarget.transform);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
         go.transform.localScale = Vector3.one;
 
-        STSceneEntity entity = go.AddComponent<STSceneEntity>();
+        STComponent component = go.AddComponent(type) as STComponent;
 
-        mTarget.AddEntity(entity);
+        mTarget.AddSTComponent(component);
     }
 
     private void AutoCreateSceneEntity()
@@ -91,7 +93,7 @@ public class STSceneInspector : Editor
             float x = new System.Random(Guid.NewGuid().GetHashCode()).Next(-(int)size.x, (int)size.x);
             float z = new System.Random(Guid.NewGuid().GetHashCode()).Next(-(int)size.z, (int)size.z);
 
-            GameObject go = new GameObject("entity-" + (mTarget.attribute.entities.Count + 1));
+            GameObject go = new GameObject("entity-" + (mTarget.attribute.components.Count + 1));
 
             go.transform.SetParent(mTarget.transform);
             go.transform.localPosition = new Vector3(x, 0, z);
@@ -118,7 +120,7 @@ public class STSceneInspector : Editor
             entity.attribute.localScale = Vector3.one * scale;
             entity.attribute.localPosition = new Vector3(0, y, 0);
 
-           mTarget.AddEntity(entity);
+           mTarget.AddSTComponent(entity);
         }
     }
 
@@ -128,7 +130,7 @@ public class STSceneInspector : Editor
         {
             DestroyImmediate(mTarget.transform.GetChild(i).gameObject);
         }
-        mTarget.attribute.entities.Clear();
+        mTarget.attribute.components.Clear();
     }
 
     private void SaveXml()
@@ -190,7 +192,7 @@ public class STSceneInspector : Editor
         {
             GameObject.DestroyImmediate(scene.transform.GetChild(i).gameObject);
         }
-        scene.attribute.entities.Clear();
+        scene.attribute.components.Clear();
 
         scene.LoadXml(text);
 

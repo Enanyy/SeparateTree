@@ -7,13 +7,25 @@ using System.Xml;
 #endif
 using UnityEngine;
 
+
+public abstract class STComponent:MonoBehaviour
+{
+    public abstract void UpdateAttribute();
+    public abstract void SetAttribute();
+#if UNITY_EDITOR
+    public abstract XmlElement ToXml(XmlNode parent);
+#endif
+    public abstract void ParseXml(SecurityElement node);
+}
+
 public abstract class STAttribute
 {
 #if UNITY_EDITOR
     public static XmlElement CreateXmlNode(XmlNode parent, string tag, Dictionary<string, string> attributes)
     {
         XmlDocument doc;
-        if (parent.ParentNode == null) {
+        if (parent.ParentNode == null)
+        {
             doc = (XmlDocument)parent;
         }
         else
@@ -38,14 +50,4 @@ public abstract class STAttribute
 
     public abstract XmlElement ToXml(XmlNode parent);
 #endif
-}
-
-public interface ISTAttribute
-{
-    void UpdateAttribute();
-    void SetAttribute();
-#if UNITY_EDITOR
-    XmlElement ToXml(XmlNode parent);
-#endif
-    void ParseXml(SecurityElement node);
 }
