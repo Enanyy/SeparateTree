@@ -10,12 +10,22 @@ using UnityEngine;
 
 public abstract class STComponent:MonoBehaviour
 {
+    protected abstract STAttribute Attribute { get; }
     public abstract void UpdateAttribute();
     public abstract void SetAttribute();
 #if UNITY_EDITOR
-    public abstract XmlElement ToXml(XmlNode parent);
+    public virtual XmlElement ToXml(XmlNode parent)
+    {
+        UpdateAttribute();
+        return Attribute.ToXml(parent);
+    }
 #endif
     public abstract void ParseXml(SecurityElement node);
+
+    public bool IsType(string tag)
+    {
+        return string.IsNullOrEmpty(tag) == false && tag == GetType().ToString();
+    }
 }
 
 public abstract class STAttribute

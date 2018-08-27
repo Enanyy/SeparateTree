@@ -40,7 +40,7 @@ public class STSceneGround :STComponent
             return;
         }
 
-        if(node.Tag == typeof(STSceneGround).ToString())
+        if(IsType(node.Tag))
         {
             attribute.localPosition = node.Attribute("localPosition").ToVector3Ex();
             attribute.localRotation = node.Attribute("localRotation").ToVector3Ex();
@@ -69,13 +69,7 @@ public class STSceneGround :STComponent
             }
         }
     }
-#if UNITY_EDITOR
-    public override XmlElement ToXml(XmlNode parent)
-    {
-        UpdateAttribute();
-        return attribute.ToXml(parent);
-    }
-#endif
+
     public override void UpdateAttribute()
     {
         if(mGo)
@@ -89,7 +83,13 @@ public class STSceneGround :STComponent
 
     [SerializeField][HideInInspector]
     public STSceneGroundAttribute attribute = new STSceneGroundAttribute();
-
+    protected override STAttribute Attribute
+    {
+        get
+        {
+            return attribute;
+        }
+    }
     [HideInInspector]
     public GameObject mGo;
 }

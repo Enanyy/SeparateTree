@@ -40,20 +40,19 @@ public class STSceneEntity: STComponent,IEntity
     }
     [SerializeField][HideInInspector]
     public STSceneEntityAttribute attribute = new STSceneEntityAttribute();
+    protected override STAttribute Attribute
+    {
+        get
+        {
+            return attribute;
+        }
+    }
     public override void UpdateAttribute()
     {
         attribute.position = transform.position;
         attribute.rotation = transform.rotation.eulerAngles;
     }
    
-#if UNITY_EDITOR
-    public override XmlElement ToXml(XmlNode parent)
-    {
-        UpdateAttribute();
-        return attribute.ToXml(parent);
-    }
-#endif
-
     public override void SetAttribute()
     {
         transform.position = attribute.position;
@@ -67,7 +66,7 @@ public class STSceneEntity: STComponent,IEntity
             return;
         }
 
-        if(node.Tag == typeof(STSceneEntity).ToString())
+        if(node.Tag == GetType().ToString())
         {
             attribute.position = node.Attribute("position").ToVector3Ex();
             attribute.rotation = node.Attribute("rotation").ToVector3Ex();

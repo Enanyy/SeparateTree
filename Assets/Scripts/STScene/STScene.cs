@@ -44,19 +44,19 @@ public class STScene : STComponent
     }
     [SerializeField]
     public STSceneAttribute attribute = new STSceneAttribute();
+    protected override STAttribute Attribute
+    {
+        get
+        {
+            return attribute;
+        }
+    }
 
     public override void UpdateAttribute()
     {
        
     }
-#if UNITY_EDITOR
-    public override XmlElement ToXml(XmlNode parent)
-    {
-        UpdateAttribute();
-        return attribute.ToXml(parent);
-    }
 
-#endif
     public override void SetAttribute()
     {
 
@@ -69,7 +69,7 @@ public class STScene : STComponent
         }
 
        
-        if(node.Tag == typeof(STScene).ToString())
+        if(IsType(node.Tag))
         {
             attribute.name = node.Attribute("name");
             attribute.asyn = node.Attribute("asyn").ToBoolEx();
