@@ -69,6 +69,7 @@ public class SeparateEntityController : MonoBehaviour
     {
         if (mIsInitialized)
             return;
+        quadTreeDepth = Mathf.Clamp(quadTreeDepth, 1, 6);
         mSeparateTree = new SeparateTree(treeType, center, size, quadTreeDepth);
         mLoadedEntityList = new List<SeparateEntity>();
         mPreDestroyQueue = new PriorityQueue<SeparateEntity>(new SeparateEntityWeightComparer());
@@ -84,29 +85,7 @@ public class SeparateEntityController : MonoBehaviour
         mRefreshTime = maxRefreshTime;
     }
 
-    /// <summary>
-    /// 初始化
-    /// </summary>
-    /// <param name="center">场景区域中心</param>
-    /// <param name="size">场景区域大小</param>
-    /// <param name="asyn">是否异步</param>
-    public void Init(Vector3 center, Vector3 size, bool asyn, SeparateTreeType treeType)
-    {
-        Init(center, size, asyn, 25, 0, 1, 5, treeType);
-    }
-
-    /// <summary>
-    /// 初始化
-    /// </summary>
-    /// <param name="center">场景区域中心</param>
-    /// <param name="size">场景区域大小</param>
-    /// <param name="asyn">是否异步</param>
-    /// <param name="maxCreateCount">更新区域时间间隔</param>
-    /// <param name="minCreateCount">检查销毁时间间隔</param>
-    public void Init(Vector3 center, Vector3 size, bool asyn, int maxCreateCount, int minCreateCount, SeparateTreeType treeType)
-    {
-        Init(center, size, asyn, maxCreateCount, minCreateCount, 1, 5, treeType);
-    }
+  
 
     void OnDestroy()
     {
@@ -128,11 +107,17 @@ public class SeparateEntityController : MonoBehaviour
     public void AddSceneEntity(IEntity entity)
     {
         if (!mIsInitialized)
+        {
             return;
+        }
         if (mSeparateTree == null)
+        {
             return;
+        }
         if (entity == null)
+        {
             return;
+        }
         //使用SeparateEntity包装
         SeparateEntity se = new SeparateEntity(entity);
         mSeparateTree.Add(se);
@@ -205,10 +190,9 @@ public class SeparateEntityController : MonoBehaviour
         else if (entity.createFlag == SeparateEntity.CreateFlag.OutofBounds)//如果发生触发的物体已经被标记为超出区域，则从待删除列表移除该物体，并标记为新物体
         {
             entity.createFlag = SeparateEntity.CreateFlag.New;
-            //if (m_PreDestroyObjectList.Remove(data))
-            {
-                mLoadedEntityList.Add(entity);
-            }
+           
+            mLoadedEntityList.Add(entity);
+            
         }
         else if (entity.createFlag == SeparateEntity.CreateFlag.None) //如果发生触发的物体未创建则创建该物体并加入已加载的物体列表
         {
@@ -238,14 +222,14 @@ public class SeparateEntityController : MonoBehaviour
             if (mLoadedEntityList[i].createFlag == SeparateEntity.CreateFlag.Old)//已加载物体标记仍然为Old，说明该物体没有进入触发区域，即该物体在区域外
             {
                 mLoadedEntityList[i].createFlag = SeparateEntity.CreateFlag.OutofBounds;
-                //m_PreDestroyObjectList.Add(m_LoadedObjectList[i]);
+               
                 if (mMinCreateCount == 0)//如果最小创建数为0直接删除
                 {
                     DestroyEntity(mLoadedEntityList[i], mIsAsyn);
                 }
                 else
                 {
-                    //m_PreDestroyObjectQueue.Enqueue(m_LoadedObjectList[i]);
+                   
                     mPreDestroyQueue.Push(mLoadedEntityList[i]);//加入待删除队列
                 }
                 mLoadedEntityList.RemoveAt(i);
@@ -267,7 +251,7 @@ public class SeparateEntityController : MonoBehaviour
         while(mPreDestroyQueue.Count>mMinCreateCount)
         {
 
-            //var obj = m_PreDestroyObjectQueue.Dequeue();
+           
             var entity = mPreDestroyQueue.Pop();
             if (entity == null)
                 continue;

@@ -20,6 +20,16 @@ public class STScene : STComponent
         public Bounds bounds = new Bounds(Vector3.zero, new Vector3(200, 0, 200));
         [HideInInspector]
         public bool asyn;
+        [HideInInspector]
+        public int maxCreateCount = 25;
+        [HideInInspector]
+        public int minCreateCount = 0;
+        [HideInInspector]
+        public float refreshTime = 2;
+        [HideInInspector]
+        public float destroyTime = 5;
+        [HideInInspector]
+        public int treeDepth = 5;
 
         public List<STComponent> components = new List<STComponent>();
 
@@ -31,6 +41,11 @@ public class STScene : STComponent
             attributes.Add("name", name);
             attributes.Add("bounds", bounds.ToStringEx());
             attributes.Add("asyn", asyn.ToString());
+            attributes.Add("maxCreateCount", maxCreateCount.ToString());
+            attributes.Add("minCreateCount", minCreateCount.ToString());
+            attributes.Add("refreshTime", refreshTime.ToString());
+            attributes.Add("destroyTime", destroyTime.ToString());
+            attributes.Add("treeDepth", treeDepth.ToString());
 
             XmlElement node = CreateXmlNode(parent, typeof(STScene).ToString(), attributes);
             for (int i = 0; i < components.Count; ++i)
@@ -74,7 +89,12 @@ public class STScene : STComponent
             attribute.name = node.Attribute("name");
             attribute.asyn = node.Attribute("asyn").ToBoolEx();
             attribute.bounds = node.Attribute("bounds").ToBoundsEx();
-
+            attribute.maxCreateCount = node.Attribute("maxCreateCount").ToInt32Ex();
+            attribute.minCreateCount = node.Attribute("minCreateCount").ToInt32Ex();
+            attribute.refreshTime = node.Attribute("refreshTime").ToFloatEx();
+            attribute.destroyTime = node.Attribute("destroyTime").ToFloatEx();
+            attribute.treeDepth = node.Attribute("treeDepth").ToInt32Ex();
+            
             if (node.Children != null)
             {
 
@@ -154,22 +174,23 @@ public class STScene : STComponent
         mController = gameObject.GetComponent<SeparateEntityController>();
         if (mController == null)
             mController = gameObject.AddComponent<SeparateEntityController>();
-        mController.Init(bounds.center, bounds.size, attribute.asyn, SeparateTreeType.QuadTree);
+        mController.Init(bounds.center,
+                        bounds.size,
+                        attribute.asyn,
+                        attribute.maxCreateCount,
+                        attribute.minCreateCount,
+                        attribute.refreshTime,
+                        attribute.destroyTime,
+                        SeparateTreeType.QuadTree,
+                        attribute.treeDepth);
 
-        List<STSceneEntity> entities = new List<STSceneEntity>();
         for (int i = 0; i < transform.childCount; ++i)
         {
             var entity = transform.GetChild(i).GetComponent<STSceneEntity>();
             if (entity)
             {
-                entities.Add(entity);
+                mController.AddSceneEntity(entity);
             }
-        }
-
-
-        for (int i = 0; i < entities.Count; i++)
-        {
-            mController.AddSceneEntity(entities[i]);
         }
     }
 

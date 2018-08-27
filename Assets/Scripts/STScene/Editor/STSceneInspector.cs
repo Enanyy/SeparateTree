@@ -25,6 +25,12 @@ public class STSceneInspector : Editor
         mTarget.attribute.name = EditorGUILayout.TextField("Name", mTarget.attribute.name);
         mTarget.attribute.bounds.size = EditorGUILayout.Vector3Field("Size", mTarget.attribute.bounds.size);
         mTarget.attribute.asyn = EditorGUILayout.Toggle("asyn", mTarget.attribute.asyn);
+        mTarget.attribute.maxCreateCount = EditorGUILayout.IntField("maxCreateCount", mTarget.attribute.maxCreateCount);
+        mTarget.attribute.minCreateCount = EditorGUILayout.IntField("minCreateCount", mTarget.attribute.minCreateCount);
+        mTarget.attribute.refreshTime = EditorGUILayout.FloatField("refreshTime", mTarget.attribute.refreshTime);
+        mTarget.attribute.destroyTime = EditorGUILayout.FloatField("destroyTime", mTarget.attribute.destroyTime);
+        mTarget.attribute.treeDepth = EditorGUILayout.IntField("treeDepth", mTarget.attribute.treeDepth);
+
         if (GUILayout.Button("Add Ground"))
         {
             AddSTComponent<STSceneGround>();

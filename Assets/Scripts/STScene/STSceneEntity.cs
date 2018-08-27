@@ -66,7 +66,7 @@ public class STSceneEntity: STComponent,IEntity
             return;
         }
 
-        if(node.Tag == GetType().ToString())
+        if(IsType(node.Tag))
         {
             attribute.position = node.Attribute("position").ToVector3Ex();
             attribute.rotation = node.Attribute("rotation").ToVector3Ex();
