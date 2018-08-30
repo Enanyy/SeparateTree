@@ -31,6 +31,9 @@ public class STScene : STComponent
         [HideInInspector]
         public int treeDepth = 5;
 
+        [HideInInspector]
+        public SeparateTreeType treeType = SeparateTreeType.QuadTree;
+
         public List<STComponent> components = new List<STComponent>();
 
         
@@ -46,6 +49,7 @@ public class STScene : STComponent
             attributes.Add("refreshTime", refreshTime.ToString());
             attributes.Add("destroyTime", destroyTime.ToString());
             attributes.Add("treeDepth", treeDepth.ToString());
+            attributes.Add("treeType", treeType.ToString());
 
             XmlElement node = CreateXmlNode(parent, typeof(STScene).ToString(), attributes);
             for (int i = 0; i < components.Count; ++i)
@@ -94,6 +98,7 @@ public class STScene : STComponent
             attribute.refreshTime = node.Attribute("refreshTime").ToFloatEx();
             attribute.destroyTime = node.Attribute("destroyTime").ToFloatEx();
             attribute.treeDepth = node.Attribute("treeDepth").ToInt32Ex();
+            attribute.treeType = (SeparateTreeType)Enum.Parse(typeof(SeparateTreeType), node.Attribute("treeType"));
             
             if (node.Children != null)
             {
@@ -124,7 +129,10 @@ public class STScene : STComponent
                     attribute.components.Add(entity);
 
                     entity.ParseXml(child);
-
+                    if(entity.IsType(typeof(STSceneEntity).ToString()))
+                    {
+                        (entity as STSceneEntity).treeType = attribute.treeType;
+                    }
                 }
             }
         }
@@ -157,7 +165,14 @@ public class STScene : STComponent
     {
         get
         {
-            attribute.bounds.center = transform.position;
+            if (attribute.treeType == SeparateTreeType.QuadTree)
+            {
+                attribute.bounds.center = transform.position;
+            }
+            else
+            {
+                attribute.bounds.center = new Vector3(transform.position.x, attribute.bounds.size.y / 2, transform.position.z);
+            }
             return attribute.bounds;
         }
     }
@@ -181,7 +196,7 @@ public class STScene : STComponent
                         attribute.minCreateCount,
                         attribute.refreshTime,
                         attribute.destroyTime,
-                        SeparateTreeType.QuadTree,
+                        attribute.treeType,
                         attribute.treeDepth);
 
         for (int i = 0; i < transform.childCount; ++i)

@@ -90,11 +90,23 @@ public class STSceneEntity: STComponent,IEntity
     public Bounds bounds
     {
         get {
-            attribute.bounds.center = transform.parent.TransformPoint(transform.localPosition);
+            if (treeType == SeparateTreeType.QuadTree)
+            {
+                attribute.bounds.center = transform.parent.TransformPoint(transform.localPosition);
+            }
+            else
+            {
+                Vector3 center = transform.parent.TransformPoint(transform.localPosition);
+
+                attribute.bounds.center = new Vector3(center.x, attribute.bounds.size.y / 2, center.z);
+            }
             return attribute.bounds; }
     }
 
     public SeparateTreeNode node { get; set; }
+
+
+    public SeparateTreeType treeType = SeparateTreeType.QuadTree;
 
     public void OnHide()
     {

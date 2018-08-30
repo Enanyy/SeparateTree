@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<STScene name="" bounds="(0,0,0,200,0,200)" asyn="False" maxCreateCount="25" minCreateCount="0" refreshTime="2" destroyTime="5" treeDepth="5">
+<STScene name="" bounds="(0,0,0,200,0,200)" asyn="False" maxCreateCount="25" minCreateCount="0" refreshTime="2" destroyTime="5" treeDepth="5" treeType="QuadTree">
   <STSceneEntity position="(98.0, 0.0, -67.0)" rotation="(0.0, 0.0, 0.0)" bounds="(98,0,-67,1,0,1)" localPosition="(0.0, 1.0, 0.0)" localRotation="(0.0, 0.0, 0.0)" localScale="(1.0, 1.0, 1.0)" path="Prefabs/Capsule" />
   <STSceneEntity position="(56.0, 0.0, 13.0)" rotation="(0.0, 0.0, 0.0)" bounds="(56,0,13,3,0,3)" localPosition="(0.0, 1.5, 0.0)" localRotation="(0.0, 0.0, 0.0)" localScale="(3.0, 3.0, 3.0)" path="Prefabs/Cube" />
   <STSceneEntity position="(-55.0, 0.0, 68.0)" rotation="(0.0, 0.0, 0.0)" bounds="(-55,0,68,3,0,3)" localPosition="(0.0, 1.5, 0.0)" localRotation="(0.0, 0.0, 0.0)" localScale="(3.0, 3.0, 3.0)" path="Prefabs/Sphere" />

@@ -30,6 +30,11 @@ public class STSceneInspector : Editor
         mTarget.attribute.refreshTime = EditorGUILayout.FloatField("refreshTime", mTarget.attribute.refreshTime);
         mTarget.attribute.destroyTime = EditorGUILayout.FloatField("destroyTime", mTarget.attribute.destroyTime);
         mTarget.attribute.treeDepth = EditorGUILayout.IntField("treeDepth", mTarget.attribute.treeDepth);
+        mTarget.attribute.treeType = (SeparateTreeType)EditorGUILayout.EnumPopup("treeType", mTarget.attribute.treeType);
+
+       
+        mTarget.attribute.bounds.size = new Vector3(mTarget.attribute.bounds.size.x, mTarget.attribute.treeType == SeparateTreeType.OcTree? 10:0, mTarget.attribute.bounds.size.z);
+        
 
         if (GUILayout.Button("Add Ground"))
         {
@@ -108,7 +113,7 @@ public class STSceneInspector : Editor
 
             STSceneEntity entity = go.AddComponent<STSceneEntity>();
             int scale = new System.Random(Guid.NewGuid().GetHashCode()).Next(1, 4);
-            entity.attribute.bounds.size = (new Vector3(scale, 0, scale));
+            entity.attribute.bounds.size = (new Vector3(scale, mTarget.attribute.treeType == SeparateTreeType.QuadTree?0: scale, scale));
             string prefab = "Capsule";
             float y = scale;
             if(i % 3 == 1)
