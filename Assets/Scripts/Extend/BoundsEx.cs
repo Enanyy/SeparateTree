@@ -24,40 +24,26 @@ public static class BoundsEx
     public static bool IsBoundsInCameraEx(this Bounds bounds, Camera camera)
     {
 
-        Matrix4x4 matrix = camera.projectionMatrix*camera.worldToCameraMatrix;
+        Matrix4x4 matrix = camera.projectionMatrix * camera.worldToCameraMatrix;
+        float halfX = bounds.size.x / 2;
+        float halfY = bounds.size.y / 2;
+        float halfZ = bounds.size.z / 2;
+        int code = ComputeOutCode(new Vector4(bounds.center.x + halfX, bounds.center.y + halfY, bounds.center.z + halfZ, 1), matrix);
 
-        int code =
-            ComputeOutCode(new Vector4(bounds.center.x + bounds.size.x/2, bounds.center.y + bounds.size.y/2,
-                bounds.center.z + bounds.size.z/2,1), matrix);
 
+        code &= ComputeOutCode(new Vector4(bounds.center.x - halfX, bounds.center.y + halfY, bounds.center.z + halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x - bounds.size.x/2, bounds.center.y + bounds.size.y/2,
-                bounds.center.z + bounds.size.z/2,1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x + halfX, bounds.center.y - halfY, bounds.center.z + halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x + bounds.size.x/2, bounds.center.y - bounds.size.y/2,
-                bounds.center.z + bounds.size.z/2, 1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x - halfX, bounds.center.y - halfY, bounds.center.z + halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x - bounds.size.x/2, bounds.center.y - bounds.size.y/2,
-                bounds.center.z + bounds.size.z/2, 1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x + halfX, bounds.center.y + halfY, bounds.center.z - halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x + bounds.size.x/2, bounds.center.y + bounds.size.y/2,
-                bounds.center.z - bounds.size.z/2, 1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x - halfX, bounds.center.y + halfY, bounds.center.z - halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x - bounds.size.x/2, bounds.center.y + bounds.size.y/2,
-                bounds.center.z - bounds.size.z/2, 1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x + halfX, bounds.center.y - halfY, bounds.center.z - halfZ, 1), matrix);
 
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x + bounds.size.x/2, bounds.center.y - bounds.size.y/2,
-                bounds.center.z - bounds.size.z/2, 1), matrix);
-
-        code &=
-            ComputeOutCode(new Vector4(bounds.center.x - bounds.size.x/2, bounds.center.y - bounds.size.y/2,
-                bounds.center.z - bounds.size.z/2, 1), matrix);
+        code &= ComputeOutCode(new Vector4(bounds.center.x - halfX, bounds.center.y - halfY, bounds.center.z - halfZ, 1), matrix);
 
 
         if (code != 0) return false;
@@ -69,40 +55,25 @@ public static class BoundsEx
     {
 
         Matrix4x4 matrix = camera.projectionMatrix * camera.worldToCameraMatrix;
+        float halfX = bounds.size.x / 2;
+        float halfY = bounds.size.y / 2;
+        float halfZ = bounds.size.z / 2;
+        int code = ComputeOutCodeEx(new Vector4(bounds.center.x + halfX, bounds.center.y + halfY, bounds.center.z + halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        int code =
-            ComputeOutCodeEx(new Vector4(bounds.center.x + bounds.size.x / 2, bounds.center.y + bounds.size.y / 2,
-                bounds.center.z + bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
 
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x - halfX, bounds.center.y + halfY, bounds.center.z + halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x - bounds.size.x / 2, bounds.center.y + bounds.size.y / 2,
-                bounds.center.z + bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x + halfX, bounds.center.y - halfY, bounds.center.z + halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x + bounds.size.x / 2, bounds.center.y - bounds.size.y / 2,
-                bounds.center.z + bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x - halfX, bounds.center.y - halfY, bounds.center.z + halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x - bounds.size.x / 2, bounds.center.y - bounds.size.y / 2,
-                bounds.center.z + bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x + halfX, bounds.center.y + halfY, bounds.center.z - halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x + bounds.size.x / 2, bounds.center.y + bounds.size.y / 2,
-                bounds.center.z - bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x - halfX, bounds.center.y + halfY, bounds.center.z - halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x - bounds.size.x / 2, bounds.center.y + bounds.size.y / 2,
-                bounds.center.z - bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x + halfX, bounds.center.y - halfY, bounds.center.z - halfZ, 1), matrix, leftex, rightex, downex, upex);
 
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x + bounds.size.x / 2, bounds.center.y - bounds.size.y / 2,
-                bounds.center.z - bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
-
-        code &=
-            ComputeOutCodeEx(new Vector4(bounds.center.x - bounds.size.x / 2, bounds.center.y - bounds.size.y / 2,
-                bounds.center.z - bounds.size.z / 2, 1), matrix, leftex, rightex, downex, upex);
-
+        code &= ComputeOutCodeEx(new Vector4(bounds.center.x - halfX, bounds.center.y - halfY, bounds.center.z - halfZ, 1), matrix, leftex, rightex, downex, upex);
 
         if (code != 0) return false;
 
@@ -143,21 +114,25 @@ public static class BoundsEx
     /// <returns></returns>
     public static bool ContainsEx(this Bounds bounds, Bounds compareTo)
     {
-        if (!bounds.Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, compareTo.size.y / 2, -compareTo.size.z / 2)))
+        float halfX = compareTo.size.x / 2;
+        float halfY = compareTo.size.y / 2;
+        float halfZ = compareTo.size.z / 2;
+
+        if (!bounds.Contains(compareTo.center + new Vector3(-halfX, halfY, -halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(compareTo.size.x / 2, compareTo.size.y / 2, -compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(halfX, halfY, -halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(compareTo.size.x / 2, compareTo.size.y / 2, compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(halfX, halfY, halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, compareTo.size.y / 2, compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(-halfX, halfY, halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, -compareTo.size.y / 2, -compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(-halfX, -halfY, -halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(compareTo.size.x / 2, -compareTo.size.y / 2, -compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(halfX, -halfY, -halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(compareTo.size.x / 2, -compareTo.size.y / 2, compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(halfX, -halfY, halfZ)))
             return false;
-        if (!bounds.Contains(compareTo.center + new Vector3(-compareTo.size.x / 2, -compareTo.size.y / 2, compareTo.size.z / 2)))
+        if (!bounds.Contains(compareTo.center + new Vector3(-halfX, -halfY, halfZ)))
             return false;
         return true;
     }
